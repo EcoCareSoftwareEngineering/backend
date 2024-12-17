@@ -30,7 +30,6 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-    command: python run.py
 
 volumes:
   db_data:

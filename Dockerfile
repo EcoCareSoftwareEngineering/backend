@@ -8,4 +8,6 @@ RUN pip install -r requirements.txt
 
 EXPOSE 5000
 
-CMD ["python", "run.py"]
+RUN chmod +x ./entrypoint.sh
+
+CMD ["./entrypoint.sh"]

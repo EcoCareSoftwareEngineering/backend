@@ -1,5 +1,5 @@
 from . import db
 
 
-class IoTDevices(db.Model):
-    pass
+class IotDevices(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
