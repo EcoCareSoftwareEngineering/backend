@@ -29,6 +29,7 @@ class DailyReminder(db.Model):
 
 class EnergySavingGoals(db.Model):
     goalId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    name = db.Column(db.String(25), nullable=True)
     target = db.Column(db.Integer(), nullable=False)
     progress = db.Column(db.Integer(), nullable=False, default=0)
     complete = db.Column(db.Boolean(), nullable=False, default=False)
