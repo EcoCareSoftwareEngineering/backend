@@ -1,30 +1,82 @@
 from . import db
-from enum import Enum
+from enum import Enum, auto
 
 
 class IotState(Enum):
-    Operating = 0
-    Fault = 1
+    Ok = auto()
+    Fault = auto()
 
 
-class IotDevice(db.Model):
+class RecurrenceRate(Enum):
+    Daily = auto()
+    Weekly = auto()
+    Fortnightly = auto()
+    Monthly = auto()
+
+
+class IotDevicesUserTags(db.Model):
+    deviceId = db.Column(
+        db.Integer(), db.ForeignKey("iot_devices.deviceId"), primary_key=True
+    )
+    tagId = db.Column(db.Integer(), db.ForeignKey("tags.tagId"), primary_key=True)
+
+
+class IotDevicesCustomTags(db.Model):
+    deviceId = db.Column(
+        db.Integer(), db.ForeignKey("iot_devices.deviceId"), primary_key=True
+    )
+    tagId = db.Column(db.Integer(), db.ForeignKey("tags.tagId"), primary_key=True)
+
+
+class DailyRemindersTags(db.Model):
+    reminderId = db.Column(
+        db.Integer(), db.ForeignKey("daily_reminders.reminderId"), primary_key=True
+    )
+    tagId = db.Column(db.Integer(), db.ForeignKey("tags.tagId"), primary_key=True)
+
+
+class Tags(db.Model):
+    tagId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    name = db.Column(db.String(30), unique=True, nullable=False)
+    reminders = db.relationship(
+        "DailyReminders", secondary=DailyRemindersTags, back_populates="tags"
+    )
+    iotDeviceUserTags = db.relationship(
+        "IotDevices", secondary=IotDevicesUserTags, back_populates="userTags"
+    )
+    iotDeviceCustomTags = db.relationship(
+        "IotDevices", secondary=IotDevicesCustomTags, back_populates="customTags"
+    )
+
+
+class IotDevices(db.Model):
     deviceId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text(), nullable=True)
     state = db.Column(db.JSON(), nullable=False)
     status = db.Column(db.Enum(IotState), nullable=False)
     pinCode = db.Column(db.String(4), nullable=True)
     uptimeTimestamp = db.Column(db.DateTime(), nullable=True)
-    logPath = db.Colum(db.String(200), nullable=True, unique=True)
-    ipAddress = db.Colum(db.String(50), nullable=True, unique=True)
+    logPath = db.Column(db.String(200), nullable=True, unique=True)
+    ipAddress = db.Column(db.String(50), nullable=True, unique=True)
+    roomTag = db.Column(db.Integer(), db.ForeignKey("tags.tagId"), nullable=True)
+    userTags = db.relationship(
+        "Tags", secondary=IotDevicesUserTags, back_populates="iotDeviceUserTags"
+    )
+    customTags = db.relationship(
+        "Tags", secondary=IotDevicesCustomTags, back_populates="iotDeviceCustomTags"
+    )
 
 
-class Tag(db.Model):
-    pass
-
-
-class DailyReminder(db.Model):
-    pass
+class DailyReminders(db.Model):
+    reminderId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    name = db.Column(db.String(30), unique=True, nullable=False)
+    description = db.Column(db.Text(), unique=True, nullable=True)
+    timeStamp = db.Column(db.DateTime(), nullable=True)
+    recurrenceRate = db.Column(db.Enum(RecurrenceRate), nullable=True)
+    tags = db.relationship(
+        "Tags", secondary=DailyRemindersTags, back_populates="reminders"
+    )
 
 
 class EnergySavingGoals(db.Model):
