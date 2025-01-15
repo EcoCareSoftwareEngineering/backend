@@ -14,11 +14,11 @@ Overview:
   - `PUT /devices/<deviceId>` - Update a device's details or state
   - `DELETE /devices/<deviceID>` - Delete an IoT device
   - `POST /devices/unlock/<deviceID>` - Requests access if PIN code setup
-- Automation
-  - `GET /automation/` - Get all configured automations
-  - `POST /automation/` - Create a new automation
-  - `PUT /automation/<automationId>` - Update an automation
-  - `DELETE /automation/<automationId>` - Delete an automation
+- Automations
+  - `GET /automations/` - Get all configured automations
+  - `POST /automations/` - Create a new automation
+  - `PUT /automations/<automationId>` - Update an automation
+  - `DELETE /automations/<automationId>` - Delete an automation
 - Energy Saving Goals
   - `GET /goals/` - Get all goals (including querying)
   - `POST /goals/` - Create a new goal
@@ -75,8 +75,6 @@ GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&c
 
 ### Get all Unconnected IoT Devices
 
-Fetches all unconnected Iot Devices
-
 #### Request 
 
 ```
@@ -127,14 +125,15 @@ POST /api/devices/
 }
 ```
 
-### Update an IoT Device's details/state 
+### Update an IoT Device's Details/State 
 
-Updates the IoT Device's details/state that correspond to `deeviceID`
+Updates the IoT Device's details/state that correspond to `deviceID`
 
 #### Request 
 
 | Parameter   | Type             | Required | Description        |
 | ----------- | ---------------- | -------- | ------------------ |
+| deviceId    | Integer          | Yes      | device ID          |
 | name        | String           | No       | device name        |
 | description | String           | No       | device description |
 | roomTag     | String           | No       | room tag           |
@@ -144,6 +143,7 @@ Updates the IoT Device's details/state that correspond to `deeviceID`
 ```
 PUT /api/devices/<deviceId>
 {
+    "deviceId": 0
     "name": "SmartLight",
     "description": "",
     "roomTag": "Kitchen",
@@ -209,15 +209,115 @@ Status 200 for correct pin code
 Status 500 for incorrect pin code
 ```
 
-## Automation
+## Automations
 
-`GET /automation/` - Get all configured automations
+### Get all Automations
 
-`POST /automation/` - Create a new automation
+#### Request 
 
-`PUT /automation/<automationId>` - Update an automation
+| Parameter | Type    | Required | Description                                                           | Default                         |
+| --------- | ------- | -------- | --------------------------------------------------------------------- | ------------------------------- |
+| deviceId  | Integer | No       | Fetches only the automations associated with the device with deviceId | Fetches all devices' automation |
 
-`DELETE /automation/<automationId>` - Delete an automation
+```
+GET /api/automations/?=deviceId
+```
+
+#### Response
+
+```
+[
+    {
+        "automationId": 0,
+        "deviceId": 0,
+        "dateTime": "...",
+        "newState": { ... }
+
+    }
+]
+```
+
+
+### Create an automation
+
+#### Request 
+
+| Parameter | Type    | Required | Description                                        |
+| --------- | ------- | -------- | -------------------------------------------------- |
+| deviceId  | Integer | Yes      | device ID of select device                         |
+| dateTime  | String  | Yes      | date and Time to activate automation               |
+| newState  | JSON    | Yes      | state to update device with when automation is run |
+
+```
+POST /api/automations/
+{
+    "deviceId": 0,
+    "dateTime": "...",
+    "newState": { ... }
+}
+```
+
+#### Response
+
+```
+{
+    "automationId": 0,
+    "deviceId": 0,
+    "dateTime": "...",
+    "newState": { ... }
+}
+```
+
+### Update an Automation
+
+#### Request 
+
+| Parameter    | Type    | Required | Description                           |
+| ------------ | ------- | -------- | ------------------------------------- |
+| automationId | Integer | Yes      | automation ID of automation to update |
+| dateTime     | String  | No       | updated date time                     |
+| newState     | JSON    | No       | Updated new state                     |
+
+```
+PUT /api/automations/<automationId>
+{
+    "automationId": 0,
+    "dateTime": "...",
+    "newState": { ... }
+}
+```
+
+#### Response
+
+```
+{
+    "automationId": 0,
+    "deviceId": 0,
+    "dateTime": "...",
+    "newState": { ... }
+}
+```
+
+### Delete an Automation
+
+
+#### Request 
+
+| Parameter    | Type    | Required | Description                    |
+| ------------ | ------- | -------- | ------------------------------ |
+| automationId | Integer | Yes      | ID of automation to be deleted |
+
+```
+DELETE /api/automations/<automationId>
+```
+
+#### Response
+
+```
+Status Code 200
+```
+
+
 
 ## Energy Saving Goals 
 
@@ -232,7 +332,7 @@ Fetches all goals.
 | completed | Boolean | No       | Include completed goals | false   |
 
 ```
-GET /api/goals?completed=true
+GET /api/goals/?completed=true
 ```
 
 #### Response
@@ -265,7 +365,7 @@ Creates a new goal.
 
 
 ```
-POST /api/goals
+POST /api/goals/
 {
     "name": "NewGoal",
     "target": 250

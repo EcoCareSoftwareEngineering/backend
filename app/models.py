@@ -69,7 +69,7 @@ class IotDevices(db.Model):
     customTags = db.relationship(
         "Tags", secondary=IotDevicesCustomTags, back_populates="iotDeviceCustomTags"
     )
-    automations = db.relationship("Automations", back_populates="devices")
+    automations = db.relationship("Automations")
 
 
 class DailyReminders(db.Model):
@@ -106,4 +106,3 @@ class Automations(db.Model):
     )
     dateTime = db.Column(db.DateTime(), nullable=False)
     newState = db.Column(db.JSON(), nullable=False)
-    devices = db.relationship("IotDevices", back_populates="automations")
