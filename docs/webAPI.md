@@ -7,30 +7,38 @@ The base URL of all endpoints is: `127.0.0.0:5000/api`.
 All endpoints return `Status Code 200` for success and `Status Code 500` for errors. 
 
 Overview:
+- General
+  - `POST /unlock/` - Request access if PIN code setup for smart home 
 - IoT Devices
   - `GET /devices/` - Get all devices (including querying)
-  - `GET /devices/new` - Get all unconnected devices (including querying)
+  - `GET /devices/new/` - Get all unconnected devices (including querying)
   - `POST /devices/` - Create a new IoT device
-  - `PUT /devices/<deviceId>` - Update a device's details or state
-  - `DELETE /devices/<deviceID>` - Delete an IoT device
-  - `POST /devices/unlock/<deviceID>` - Requests access if PIN code setup
+  - `PUT /devices/<deviceId>/` - Update a device's details or state
+  - `DELETE /devices/<deviceID>/` - Delete an IoT device
+  - `POST /devices/unlock/<deviceID>/` - Requests access if PIN code setup for IoT device
 - Automations
   - `GET /automations/` - Get all configured automations
   - `POST /automations/` - Create a new automation
-  - `PUT /automations/<automationId>` - Update an automation
-  - `DELETE /automations/<automationId>` - Delete an automation
+  - `PUT /automations/<automationId>/` - Update an automation
+  - `DELETE /automations/<automationId>/` - Delete an automation
 - Energy Saving Goals
   - `GET /goals/` - Get all goals (including querying)
   - `POST /goals/` - Create a new goal
-  - `PUT /goals/<goalId>` - Update a goal
-  - `DELETE /goals/<goalId>` - Delete a goal
+  - `PUT /goals/<goalId>/` - Update a goal
+  - `DELETE /goals/<goalId>/` - Delete a goal
 - Energy Records
   - `GET /energy/` - Get energy records (including querying)
 - Daily Reports
   - `GET /reports/` - Get all reports' metadata (including querying)
-  - `GET /reports/<reportId>` - Get the full report
-  - `DELETE /reports/<reportId>` - Delete a report
+  - `GET /reports/<reportId>/` - Get the full report
+  - `DELETE /reports/<reportId>/` - Delete a report
 - Daily Reminders
+
+## General
+
+### Unlock Smart Home
+
+`POST /unlock/`
 
 ## IoT Devices
 
@@ -78,7 +86,7 @@ GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&c
 #### Request 
 
 ```
-GET /api/devices/new
+GET /api/devices/new/
 ```
 
 #### Response
@@ -141,7 +149,7 @@ Updates the IoT Device's details/state that correspond to `deviceID`
 | customTags  | Array of Strings | No       | custom tags        |
 
 ```
-PUT /api/devices/<deviceId>
+PUT /api/devices/<deviceId>/
 {
     "deviceId": 0
     "name": "SmartLight",
@@ -176,7 +184,7 @@ Deletes the IoT device corresponding to `deviceID`
 #### Request 
 
 ```
-DELETE /api/devices/<deviceID>
+DELETE /api/devices/<deviceID>/
 ```
 
 #### Response
@@ -196,7 +204,7 @@ If an IoT deivce has a pin code setup, `pinEnabled` will be true, use this endpo
 | pin       | String | Yes      | PIN entered by user |
 
 ```
-POST /api/devices/unlock/<deviceId>
+POST /api/devices/unlock/<deviceId>/
 {
     "pin": "0000"
 }
@@ -279,7 +287,7 @@ POST /api/automations/
 | newState     | JSON    | No       | Updated new state                     |
 
 ```
-PUT /api/automations/<automationId>
+PUT /api/automations/<automationId>/
 {
     "automationId": 0,
     "dateTime": "...",
@@ -308,7 +316,7 @@ PUT /api/automations/<automationId>
 | automationId | Integer | Yes      | ID of automation to be deleted |
 
 ```
-DELETE /api/automations/<automationId>
+DELETE /api/automations/<automationId>/
 ```
 
 #### Response
@@ -400,7 +408,7 @@ Updates the name and/or target of the goal with the goal ID of `goalId`.
 
 
 ```
-PUT /api/goals/<goalId>
+PUT /api/goals/<goalId>/
 {
     "name": "NewGoalName",
     "target": 300
@@ -428,7 +436,7 @@ Delete the goal with the goal ID of `goalId`.
 #### Request
 
 ```
-DELETE /api/goals/<goalId>
+DELETE /api/goals/<goalId>/
 ```
 
 #### Response
@@ -439,18 +447,16 @@ Status: 200
 
 ## Energy Records
 
-`GET /energy` - Get all energy records (optional time range, grouping, etc)
+`GET /energy/` - Get all energy records (optional time range, grouping, etc)
 
 
 ## Daily Reports
 
-`GET /reports` - Get all reports headers
+`GET /reports/` - Get all reports headers
 
-`GET /reports/latest` - Get the most recent report
+`GET /reports/<reportId>/` - Get the full report
 
-`GET /reports/<reportId>` - Get the full report
-
-`DELETE /reports/<reportId>` - Delete a report
+`DELETE /reports/<reportId>/` - Delete a report
 
 ## Daily Reminders
 

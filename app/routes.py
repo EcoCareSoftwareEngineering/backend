@@ -1,8 +1,12 @@
-from flask import Blueprint
-
-main = Blueprint("main", __name__, url_prefix="/api")
+from flask import jsonify
 
 
-@main.route("/")
-def index():
-    return {"Data": "Results"}
+def register_routes(app):
+
+    @app.errorhandler(404)
+    def error_handler(error):
+        return jsonify({"Error": "Invalid URL"}), 500
+
+    from .api import api_blueprint
+
+    app.register_blueprint(api_blueprint)
