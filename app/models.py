@@ -1,4 +1,3 @@
-from sqlalchemy import select
 from . import db
 from enum import Enum, auto
 
@@ -40,15 +39,6 @@ class DailyRemindersTags(db.Model):
 class Tags(db.Model):
     tagId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     name = db.Column(db.String(30), unique=True, nullable=False)
-    reminders = db.relationship(
-        "DailyReminders", secondary=DailyRemindersTags, back_populates="tags"
-    )
-    iotDeviceUserTags = db.relationship(
-        "IotDevices", secondary=IotDevicesUserTags, back_populates="userTags"
-    )
-    iotDeviceCustomTags = db.relationship(
-        "IotDevices", secondary=IotDevicesCustomTags, back_populates="customTags"
-    )
 
 
 class IotDevices(db.Model):
@@ -63,13 +53,24 @@ class IotDevices(db.Model):
     logPath = db.Column(db.String(200), nullable=True, unique=True)
     ipAddress = db.Column(db.String(50), nullable=True, unique=True)
     roomTag = db.Column(db.Integer(), db.ForeignKey("tags.tagId"), nullable=True)
-    userTags = db.relationship(
-        "Tags", secondary=IotDevicesUserTags, back_populates="iotDeviceUserTags"
+
+
+class IotDeviceUsage(db.Model):
+    deviceUsageId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    timestamp = db.Column(db.DateTime(), nullable=False)
+    usage = db.Column(db.Integer(), nullable=False)
+    deviceId = db.Column(
+        db.Integer(), db.ForeignKey("iot_devices.deviceId"), nullable=True
     )
-    customTags = db.relationship(
-        "Tags", secondary=IotDevicesCustomTags, back_populates="iotDeviceCustomTags"
+
+
+class Automations(db.Model):
+    automationId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    deviceId = db.Column(
+        db.Integer(), db.ForeignKey("iot_devices.deviceId"), nullable=False
     )
-    automations = db.relationship("Automations")
+    dateTime = db.Column(db.DateTime(), nullable=False)
+    newState = db.Column(db.JSON(), nullable=False)
 
 
 class DailyReminders(db.Model):
@@ -78,9 +79,6 @@ class DailyReminders(db.Model):
     description = db.Column(db.Text(), unique=True, nullable=True)
     timeStamp = db.Column(db.DateTime(), nullable=True)
     recurrenceRate = db.Column(db.Enum(RecurrenceRate), nullable=True)
-    tags = db.relationship(
-        "Tags", secondary=DailyRemindersTags, back_populates="reminders"
-    )
 
 
 class EnergySavingGoals(db.Model):
@@ -97,12 +95,3 @@ class EnergyRecords(db.Model):
     timestamp = db.Column(db.DateTime(), nullable=False)
     energyUse = db.Column(db.Integer(), nullable=False)
     energyGeneration = db.Column(db.Integer(), nullable=False)
-
-
-class Automations(db.Model):
-    automationId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    deviceId = db.Column(
-        db.Integer(), db.ForeignKey("iot_devices.deviceId"), nullable=False
-    )
-    dateTime = db.Column(db.DateTime(), nullable=False)
-    newState = db.Column(db.JSON(), nullable=False)

@@ -16,6 +16,7 @@ Overview:
   - `PUT /devices/<deviceId>/` - Update a device's details or state
   - `DELETE /devices/<deviceID>/` - Delete an IoT device
   - `POST /devices/unlock/<deviceID>/` - Requests access if PIN code setup for IoT device
+  - `GET /devices/usage/` - Get device usage (including querying)
 - Automations
   - `GET /automations/` - Get all configured automations
   - `POST /automations/` - Create a new automation
@@ -38,7 +39,27 @@ Overview:
 
 ### Unlock Smart Home
 
-`POST /unlock/`
+Required to unlock the API, once unlocked the API is unlocked until server is turned off. Future version of prototype will have a timeout feature.
+
+#### Request 
+
+| Parameter | Type   | Required | Description               |
+| --------- | ------ | -------- | ------------------------- |
+| pinCode   | String | Yes      | PIN Code to unlock device |
+
+```
+POST /api/unlock/
+{
+    "pinCode": "0000" 
+}
+```
+
+#### Response
+
+```
+Status 200 for correct pin code
+Status 500 for incorrect pin code
+```
 
 ## IoT Devices
 
@@ -69,9 +90,17 @@ GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&c
         "deviceId": 0,
         "name": "SmartLight",
         "description": "",
-        "state": { ... },
+        "state": [
+            {
+                "fieldName": "hue",
+                "datatype": "integer",
+                "value": 2
+            }
+            ...
+        ],
         "status": ("Ok" | "Fault"),
         "pinEnabled": true,
+        "unlocked": false,
         "uptimeTimeStamp: "...",
         "ipAddress": "...",
         "roomTag": "Kitchen",
@@ -123,8 +152,17 @@ POST /api/devices/
     "deviceId": 0,
     "name": "SmartLight",
     "description": "",
-    "state": { ... },
+    "state": [
+        {
+            "fieldName": "hue",
+            "datatype": "integer",
+            "value": 2
+        }
+        ...
+    ],
     "status": ("Ok" | "Fault"),
+    "pinEnabled": true,
+    "unlocked": false,
     "uptimeTimeStamp: "...",
     "ipAddress": "...",
     "roomTag": "Kitchen",
@@ -144,6 +182,7 @@ Updates the IoT Device's details/state that correspond to `deviceID`
 | deviceId    | Integer          | Yes      | device ID          |
 | name        | String           | No       | device name        |
 | description | String           | No       | device description |
+| state       | JSON             | No       | device state       |
 | roomTag     | String           | No       | room tag           |
 | userTags    | Array of Strings | No       | user tags          |
 | customTags  | Array of Strings | No       | custom tags        |
@@ -154,6 +193,14 @@ PUT /api/devices/<deviceId>/
     "deviceId": 0
     "name": "SmartLight",
     "description": "",
+    "state": [
+        {
+            "fieldName": "hue",
+            "datatype": "integer",
+            "value": 2
+        }
+        ...
+    ],
     "roomTag": "Kitchen",
     "userTags": ["Person1", "Person2"],
     "customTags": ["Tag1", "Tag2"]
@@ -167,8 +214,17 @@ PUT /api/devices/<deviceId>/
     "deviceId": 0,
     "name": "SmartLight",
     "description": "",
-    "state": { ... },
+    "state": [
+        {
+            "fieldName": "hue",
+            "datatype": "integer",
+            "value": 2
+        }
+        ...
+    ],
     "status": ("Ok" | "Fault"),
+    "pinEnabled": true,
+    "unlocked": false,
     "uptimeTimeStamp: "...",
     "ipAddress": "...",
     "roomTag": "Kitchen",
@@ -190,12 +246,13 @@ DELETE /api/devices/<deviceID>/
 #### Response
 
 ```
-Status Code 200
+Status 200 for success
+Status 500 for failure
 ```
 
 ### Unlock an IoT device
 
-If an IoT deivce has a pin code setup, `pinEnabled` will be true, use this endpoint to unlock the deivce.
+If an IoT deivce has a pin code setup, `pinEnabled` will be true, use this endpoint to unlock the deivce. Once unlocked the device is unlocked until server is turned off. Future version of prototype will have a timeout feature.
 
 #### Request 
 
@@ -216,6 +273,8 @@ POST /api/devices/unlock/<deviceId>/
 Status 200 for correct pin code
 Status 500 for incorrect pin code
 ```
+
+`GET /devices/usage/` - Get device usage (including querying)
 
 ## Automations
 
@@ -322,7 +381,8 @@ DELETE /api/automations/<automationId>/
 #### Response
 
 ```
-Status Code 200
+Status 200 for success
+Status 500 for failure
 ```
 
 
@@ -442,7 +502,8 @@ DELETE /api/goals/<goalId>/
 #### Response
 
 ```
-Status: 200
+Status 200 for success
+Status 500 for failure
 ```
 
 ## Energy Records
