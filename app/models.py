@@ -58,7 +58,7 @@ class IotDevices(db.Model):
 class IotDeviceUsage(db.Model):
     deviceUsageId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     timestamp = db.Column(db.DateTime(), nullable=False)
-    usage = db.Column(db.Integer(), nullable=False)
+    usage = db.Column(db.Integer(), nullable=False)  # Minutes, 0-60
     deviceId = db.Column(
         db.Integer(), db.ForeignKey("iot_devices.deviceId"), nullable=True
     )
@@ -85,7 +85,7 @@ class EnergySavingGoals(db.Model):
     goalId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     name = db.Column(db.String(25), nullable=True)
     target = db.Column(db.Integer(), nullable=False)
-    progress = db.Column(db.Integer(), nullable=False, default=0)
+    progress = db.Column(db.Integer(), nullable=False, default=0)  # Percentage
     complete = db.Column(db.Boolean(), nullable=False, default=False)
     date = db.Column(db.Date(), nullable=False, default=False)
 

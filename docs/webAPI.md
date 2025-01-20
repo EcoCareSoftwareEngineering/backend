@@ -8,31 +8,31 @@ All endpoints return `Status Code 200` for success and `Status Code 500` for err
 
 Overview:
 - General
-  - `POST /unlock/` - Request access if PIN code setup for smart home 
+  - [`POST /unlock/`](#unlock-smart-home) - Request access if PIN code setup for smart home 
 - IoT Devices
-  - `GET /devices/` - Get all devices (including querying)
-  - `GET /devices/new/` - Get all unconnected devices (including querying)
-  - `POST /devices/` - Create a new IoT device
-  - `PUT /devices/<deviceId>/` - Update a device's details or state
-  - `DELETE /devices/<deviceID>/` - Delete an IoT device
-  - `POST /devices/unlock/<deviceID>/` - Requests access if PIN code setup for IoT device
-  - `GET /devices/usage/` - Get device usage (including querying)
+  - [`GET /devices/`](#get-all-iot-devices) - Get all devices (including querying)
+  - [`GET /devices/new/`](#get-all-unconnected-iot-devices) - Get all unconnected devices (including querying)
+  - [`POST /devices/`](#add-a-new-iot-device) - Create a new IoT device
+  - [`PUT /devices/<deviceId>/`](#update-an-iot-devices-detailsstate) - Update a device's details or state
+  - [`DELETE /devices/<deviceID>/`](#delete-an-iot-device) - Delete an IoT device
+  - [`POST /devices/unlock/<deviceID>/`](#unlock-an-iot-device) - Requests access if PIN code setup for IoT device
+  - [`GET /devices/usage/`](#get-device-usage) - Get device usage (including querying)
 - Automations
-  - `GET /automations/` - Get all configured automations
-  - `POST /automations/` - Create a new automation
-  - `PUT /automations/<automationId>/` - Update an automation
-  - `DELETE /automations/<automationId>/` - Delete an automation
+  - [`GET /automations/`](#get-all-automations) - Get all configured automations
+  - [`POST /automations/`](#create-an-automation) - Create a new automation
+  - [`PUT /automations/<automationId>/`](#update-an-automation) - Update an automation
+  - [`DELETE /automations/<automationId>/`](#delete-an-automation) - Delete an automation
 - Energy Saving Goals
-  - `GET /goals/` - Get all goals (including querying)
-  - `POST /goals/` - Create a new goal
-  - `PUT /goals/<goalId>/` - Update a goal
-  - `DELETE /goals/<goalId>/` - Delete a goal
+  - [`GET /goals/`](#get-all-goals) - Get all goals (including querying)
+  - [`POST /goals/`](#create-a-new-goal) - Create a new goal
+  - [`PUT /goals/<goalId>/`](#update-a-goal) - Update a goal
+  - [`DELETE /goals/<goalId>/`](#delete-a-goal) - Delete a goal
 - Energy Records
-  - `GET /energy/` - Get energy records (including querying)
+  - [`GET /energy/`](#get-energy-usage) - Get energy records (including querying)
 - Daily Reports
-  - `GET /reports/` - Get all reports' metadata (including querying)
-  - `GET /reports/<reportId>/` - Get the full report
-  - `DELETE /reports/<reportId>/` - Delete a report
+  - [`GET /reports/`](#get-daily-reports) - Get all reports' metadata (including querying)
+  - [`GET /reports/<reportId>/`](#get-full-report) - Get the full report
+  - [`DELETE /reports/<reportId>/`](#delete-a-report) - Delete a report
 - Daily Reminders
 
 ## General
@@ -96,7 +96,6 @@ GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&c
                 "datatype": "integer",
                 "value": 2
             }
-            ...
         ],
         "status": ("Ok" | "Fault"),
         "pinEnabled": true,
@@ -158,7 +157,6 @@ POST /api/devices/
             "datatype": "integer",
             "value": 2
         }
-        ...
     ],
     "status": ("Ok" | "Fault"),
     "pinEnabled": true,
@@ -199,7 +197,6 @@ PUT /api/devices/<deviceId>/
             "datatype": "integer",
             "value": 2
         }
-        ...
     ],
     "roomTag": "Kitchen",
     "userTags": ["Person1", "Person2"],
@@ -220,7 +217,6 @@ PUT /api/devices/<deviceId>/
             "datatype": "integer",
             "value": 2
         }
-        ...
     ],
     "status": ("Ok" | "Fault"),
     "pinEnabled": true,
@@ -274,7 +270,32 @@ Status 200 for correct pin code
 Status 500 for incorrect pin code
 ```
 
-`GET /devices/usage/` - Get device usage (including querying)
+### Get Device Usage
+
+#### Request 
+
+| Parameter  | Type    | Required | Description                                                                                                                               |
+| ---------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| deviceId   | Integer | No       | Fetch only usage of device with device ID                                                                                                 |
+| timePeriod | String  | No       | ("Day", "Week", "Month", "Year"), fetches the usage from the last Day/Week/..., grouped Day: Hours, Week: Days, Month: Days, Year: Months |
+
+```
+GET /api/devices/usage/?deviceId=0&timePeriod=Day
+```
+
+#### Response
+
+Response is minutes device(s) were active according to timePeriod groupings, i.e if timePeriod was Day then there will be 24 values.
+
+```
+[
+    50,
+    20,
+    30,
+]
+```
+
+
 
 ## Automations
 
@@ -298,7 +319,13 @@ GET /api/automations/?=deviceId
         "automationId": 0,
         "deviceId": 0,
         "dateTime": "...",
-        "newState": { ... }
+        "newState": [
+            {
+                "fieldName": "hue",
+                "datatype": "integer",
+                "value": 2
+            }
+        ],
 
     }
 ]
@@ -320,7 +347,13 @@ POST /api/automations/
 {
     "deviceId": 0,
     "dateTime": "...",
-    "newState": { ... }
+    "newState": [
+        {
+            "fieldName": "hue",
+            "datatype": "integer",
+            "value": 2
+        }
+    ],
 }
 ```
 
@@ -331,7 +364,13 @@ POST /api/automations/
     "automationId": 0,
     "deviceId": 0,
     "dateTime": "...",
-    "newState": { ... }
+    "newState": [
+        {
+            "fieldName": "hue",
+            "datatype": "integer",
+            "value": 2
+        }
+    ],
 }
 ```
 
@@ -350,7 +389,13 @@ PUT /api/automations/<automationId>/
 {
     "automationId": 0,
     "dateTime": "...",
-    "newState": { ... }
+    "newState": [
+        {
+            "fieldName": "hue",
+            "datatype": "integer",
+            "value": 2
+        }
+    ],
 }
 ```
 
@@ -361,7 +406,14 @@ PUT /api/automations/<automationId>/
     "automationId": 0,
     "deviceId": 0,
     "dateTime": "...",
-    "newState": { ... }
+    "newState": [
+        {
+            "fieldName": "hue",
+            "datatype": "integer",
+            "value": 2
+        }
+    ],
+
 }
 ```
 
@@ -385,8 +437,6 @@ Status 200 for success
 Status 500 for failure
 ```
 
-
-
 ## Energy Saving Goals 
 
 ### Get All Goals
@@ -405,17 +455,18 @@ GET /api/goals/?completed=true
 
 #### Response
 
+Progress is a percentage
+
 ```
 [
     {
         "goalId": 1,
         "name": "MyGoal",
         "target": 200,
-        "progress": 120,
+        "progress": 80,
         "complete": false,
         "date": "19-03-25"
-    },
-    ...
+    }
 ]
 ```
 
@@ -508,16 +559,90 @@ Status 500 for failure
 
 ## Energy Records
 
-`GET /energy/` - Get all energy records (optional time range, grouping, etc)
+### Get Energy Usage 
 
+#### Request 
+
+| Parameter  | Type   | Required | Description                                                                                                                               |
+| ---------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| timePeriod | String | No       | ("Day", "Week", "Month", "Year"), fetches the usage from the last Day/Week/..., grouped Day: Hours, Week: Days, Month: Days, Year: Months |
+
+
+```
+GET /api/?timePeriod=Day
+```
+
+#### Response
+
+```
+{
+    energyUsage: [
+        20, 30, 40, ...
+    ]
+    energyGeneration: [
+        20, 10, 5, ...
+    ]
+}
+```
 
 ## Daily Reports
 
-`GET /reports/` - Get all reports headers
+### Get Daily Reports
 
-`GET /reports/<reportId>/` - Get the full report
 
-`DELETE /reports/<reportId>/` - Delete a report
+#### Request 
+
+```
+GET /api/reports/
+```
+
+#### Response
+
+```
+{
+    ...
+}
+```
+
+### Get Full Report 
+
+
+#### Request 
+
+| Parameter | Type   | Required | Description                                  |
+| --------- | ------ | -------- | -------------------------------------------- |
+| date      | String | Yes      | Get report associated with the date provided |
+
+```
+GET /api/reports/<reportId>/?date="2024-01-01"
+```
+
+#### Response
+
+```
+{
+    ...
+}
+```
+
+### Delete a Report
+
+#### Request 
+
+| Parameter | Type   | Required | Description                                  |
+| --------- | ------ | -------- | -------------------------------------------- |
+| date      | String | Yes      | Get report associated with the date provided |
+
+```
+DELETE /api/reports/<reportId>/
+```
+
+#### Response
+
+```
+Status 200 for success
+Status 500 for failure
+```
 
 ## Daily Reminders
 
