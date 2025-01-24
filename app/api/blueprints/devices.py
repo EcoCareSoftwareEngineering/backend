@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
-from sqlalchemy import insert, select
+from sqlalchemy import select, insert, update, delete
 
-from ...models import IotDevices, IotState
+from ...models import *
 from ... import db
 
 devices_blueprint = Blueprint("devices", __name__, url_prefix="/devices")
