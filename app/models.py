@@ -15,6 +15,10 @@ class RecurrenceRate(Enum):
     Monthly = auto()
 
 
+class Initialised(db.Model):
+    pk = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+
+
 class IotDevicesUserTags(db.Model):
     deviceId = db.Column(
         db.Integer(), db.ForeignKey("iot_devices.deviceId"), primary_key=True
