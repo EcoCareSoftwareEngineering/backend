@@ -1,7 +1,5 @@
 # Local Device Web API
 
-The Web API is used by the local device frontend.
-
 The base URL of all endpoints is: `127.0.0.0:5000/api`.
 
 All endpoints return `Status Code 200` for success and `Status Code 500` for errors. 
