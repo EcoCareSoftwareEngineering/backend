@@ -14,3 +14,8 @@ api_blueprint.register_blueprint(energy_blueprint)
 api_blueprint.register_blueprint(goals_blueprint)
 api_blueprint.register_blueprint(misc_blueprint)
 api_blueprint.register_blueprint(reports_blueprint)
+
+from .blueprints.dev import dev_blueprint
+
+development_blueprint = Blueprint("development", __name__, url_prefix="/dev")
+development_blueprint.register_blueprint(dev_blueprint)

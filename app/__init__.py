@@ -12,7 +12,7 @@ db = SQLAlchemy()
 
 def create_app():
     from . import models
-    from .data import add_data
+    from .data import add_data_check
     from .routes import register_routes
 
     app = Flask(__name__)
@@ -24,7 +24,6 @@ def create_app():
 
     with app.app_context():
         # init()
-
         conn = db.engine.connect()
         migration_context = MigrationContext.configure(conn)
 
@@ -32,7 +31,7 @@ def create_app():
             migrate()
             upgrade()
 
-        add_data()
+        add_data_check()
 
     register_routes(app)
 
