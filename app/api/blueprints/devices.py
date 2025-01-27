@@ -1,3 +1,5 @@
+import ipaddress
+import json
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select, insert, update, delete
 
@@ -13,23 +15,54 @@ def devices_handler():
         return get_devices_handler()
     elif request.method == "POST":
         return post_devices_handler()
-        # statement = insert(IotDevices).values(
-        #     name="Test", state={"State": "date"}, status=IotState.Ok
-        # )
-        # with db.engine.connect() as conn:
-        #     conn.execute(statement)
-        #     conn.commit()
-        # return jsonify({"endpoint": "POST_devices_handler"}), 200
     return jsonify({"Error": "Invalid"}), 500
 
 
 def get_devices_handler():
-    # statement = select(IotDevices)
-    # with db.engine.connect() as conn:
-    #     data = conn.execute(statement)
-    #     for row in data:
-    #         print(row, flush=True)
-    return jsonify({"endpoint": "GET_devices_handler"}), 200
+    if request.args.get("status") == "Fault":
+        statement = select(IotDevices).where(IotDevices.status == IotState.Fault)
+    elif request.args.get("status") == "Ok":
+        statement = select(IotDevices).where(IotDevices.status == IotState.Ok)
+    else:
+        statement = select(IotDevices)
+
+    with db.engine.connect() as conn:
+        results = conn.execute(statement)
+
+    data_to_send = []
+    for result in results:
+        (
+            deviceId,
+            name,
+            description,
+            state,
+            status,
+            pinCode,
+            unlocked,
+            uptimeTimestamp,
+            logPath,
+            ipAddress,
+            roomTag,
+        ) = result
+
+        # Data processing here
+
+        entry = {
+            "deviceId": deviceId,
+            "name": name,
+            "description": description,
+            "state": state,
+            "status": "Ok" if status == IotState.Ok else "Fault",
+            "pinEnabled": pinCode is not None,
+            "unlocked": unlocked,
+            "uptimeTimestamp": uptimeTimestamp,
+            "logPath": logPath,
+            "ipAddress": ipAddress,
+            "roomTag": roomTag,
+        }
+        data_to_send.append(entry)
+
+    return jsonify(data_to_send), 200
 
 
 def post_devices_handler():
