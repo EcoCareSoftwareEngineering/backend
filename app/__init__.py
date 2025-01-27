@@ -26,6 +26,8 @@ def create_app():
     with app.app_context():
         if not os.path.exists(os.path.join(os.getcwd(), "migrations")):
             init()
+            migrate()
+            upgrade()
 
         conn = db.engine.connect()
         migration_context = MigrationContext.configure(conn)
