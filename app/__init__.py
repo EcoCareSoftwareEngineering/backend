@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_migrate import Migrate, init, migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
@@ -23,7 +24,9 @@ def create_app():
     Migrate(app, db)
 
     with app.app_context():
-        # init()
+        if not os.path.exists(os.path.join(os.getcwd(), "migrations")):
+            init()
+
         conn = db.engine.connect()
         migration_context = MigrationContext.configure(conn)
 
