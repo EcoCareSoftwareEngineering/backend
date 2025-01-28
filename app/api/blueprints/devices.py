@@ -1,5 +1,3 @@
-import ipaddress
-import json
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select, insert, update, delete
 
@@ -20,9 +18,13 @@ def devices_handler():
 
 def get_devices_handler():
     if request.args.get("status") == "Fault":
-        statement = select(IotDevices).where(IotDevices.status == IotState.Fault)
+        statement = select(IotDevices).where(
+            IotDevices.status == IotDeviceFaultStatus.Fault
+        )
     elif request.args.get("status") == "Ok":
-        statement = select(IotDevices).where(IotDevices.status == IotState.Ok)
+        statement = select(IotDevices).where(
+            IotDevices.status == IotDeviceFaultStatus.Ok
+        )
     else:
         statement = select(IotDevices)
 
@@ -37,12 +39,11 @@ def get_devices_handler():
             description,
             state,
             status,
+            faultStatus,
             pinCode,
             unlocked,
             uptimeTimestamp,
-            logPath,
             ipAddress,
-            roomTag,
         ) = result
 
         # Data processing here
@@ -52,13 +53,12 @@ def get_devices_handler():
             "name": name,
             "description": description,
             "state": state,
-            "status": "Ok" if status == IotState.Ok else "Fault",
+            "status": "Om" if status == IotDeviceStatus.On else "Off",
+            "faultStatus": "Ok" if status == IotDeviceFaultStatus.Ok else "Fault",
             "pinEnabled": pinCode is not None,
             "unlocked": unlocked,
             "uptimeTimestamp": uptimeTimestamp,
-            "logPath": logPath,
             "ipAddress": ipAddress,
-            "roomTag": roomTag,
         }
         data_to_send.append(entry)
 

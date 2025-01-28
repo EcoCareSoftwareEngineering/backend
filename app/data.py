@@ -1,4 +1,4 @@
-from sqlalchemy import select, insert, update, delete
+from sqlalchemy import select, insert, text, update, delete
 import csv, json
 
 from . import db
@@ -13,8 +13,10 @@ def reset_db():
 def delete_data_from_db():
     with db.engine.connect() as conn:
         conn.execute(delete(IotDevices))
+        conn.execute(text("ALTER TABLE iot_devices AUTO_INCREMENT = 0;"))
 
         # TODO Finish deleting data
+        # TODO Reset autoincrement values to 0
 
         conn.commit()
 
