@@ -3,6 +3,7 @@ from sqlalchemy import select, insert, update, delete
 
 from ...models import *
 from ... import db
+from ...routes import check_token
 
 devices_blueprint = Blueprint("devices", __name__, url_prefix="/devices")
 

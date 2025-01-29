@@ -1,3 +1,4 @@
 {
-    "pinCode": "0000"
+    "pinCode": "0000",
+    "touchscreenToken": "token"
 }

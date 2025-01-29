@@ -6,6 +6,8 @@ All endpoints return `Status Code 200` for success and `Status Code 500` for err
 
 For more information on data stored in the database see [models.py](../app/models.py)
 
+Future addition that might not be added but be aware: Login endpoint will return an authorisation token which must be sent in the header under "token" to all endpoints. The touchscreen should make an implicit login call with the credentials Username: "touchscreen", Password: "password" to get its token.
+
 Overview:
 - General
   - [`GET /unlock/`](#check-if-the-smart-home-has-a-pin-enabled) - Check if the local device has a PIN enabled
