@@ -298,12 +298,12 @@ Status 500 for incorrect pin code
 
 #### Request 
 
-| Parameter  | Type    | Required | Description                                                                                                                               |
-| ---------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| deviceId   | Integer | No       | Fetch only usage of device with device ID                                                                                                 |
-| timePeriod | String  | No       | ("Day", "Week", "Month", "Year"), fetches the usage from the last Day/Week/..., grouped Day: Hours, Week: Days, Month: Days, Year: Months |
-| rangeStart | Date    | No       | Start date of search range                                                                                                                |
-| rangeEnd   | Date    | No       | End date of search range                                                                                                                  |
+| Parameter  | Type    | Required | Description                                                                                                                         |
+| ---------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| deviceId   | Integer | Yes      | Fetch only usage of device with device ID                                                                                           |
+| timePeriod | String  | Yes      | ("Day", "Week", "Month", "Year"), fetches the usage from the search range grouped Day: Hours, Week: Days, Month: Days, Year: Months |
+| rangeStart | Date    | Yes      | Start date of search range                                                                                                          |
+| rangeEnd   | Date    | Yes      | End date of search range                                                                                                            |
 
 ```
 GET /api/devices/usage/?deviceId=0&timePeriod=Day

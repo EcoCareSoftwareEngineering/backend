@@ -1,4 +1,4 @@
-import os
+import os, json
 from flask import Flask
 from flask_migrate import Migrate, init, migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
@@ -9,6 +9,10 @@ from .config import Config
 
 
 db = SQLAlchemy()
+
+
+with open("config/smart_home_config.json") as file:
+    local_device_config = json.load(file)
 
 
 def create_app():
