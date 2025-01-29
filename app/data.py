@@ -14,6 +14,10 @@ def delete_data_from_db():
     with db.engine.connect() as conn:
         conn.execute(delete(IotDevices))
         conn.execute(text("ALTER TABLE iot_devices AUTO_INCREMENT = 0;"))
+        conn.execute(delete(Tags))
+        conn.execute(text("ALTER TABLE tags AUTO_INCREMENT = 0;"))
+        conn.execute(delete(IotDevicesTags))
+        conn.execute(text("ALTER TABLE iot_devices_tags AUTO_INCREMENT = 0;"))
 
         # TODO Finish deleting data
         # TODO Reset autoincrement values to 0
@@ -43,6 +47,31 @@ def add_data():
         # TODO Add data to rest of tables
 
         conn.execute(insert(IotDevices), data)
+        
+        # Data for tags
+        tag_rows = []
+        try:
+            with open("data/tags.csv", "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                tag_rows.extend([row for row in reader])
+        except Exception as e:
+            print(f"Error reading CSV file: {e}") 
+            
+        tag_data = []
+        
+        for row in tag_rows:
+            try:
+                row["tagId"] = int(row["tagId"])
+                row["tagType"] = TagType[row["tagType"]].name
+            
+                tag_data.append({key: value for key, value in row.items() if value !=""})
+            except Exception as e:
+                print(f"Error processing tag row: {row}, Error: {e}")
+                continue
+            
+        if tag_data:
+            conn.execute(insert(Tags), tag_data)
+            
         conn.commit()
 
 
