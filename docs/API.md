@@ -4,8 +4,11 @@ The base URL of all endpoints is: `127.0.0.0:5000/api`.
 
 All endpoints return `Status Code 200` for success and `Status Code 500` for errors. 
 
+For more information on data stored in the database see [models.py](../app/models.py)
+
 Overview:
 - General
+  - [`GET /unlock/`](#check-if-the-smart-home-has-a-pin-enabled) - Check if the local device has a PIN enabled
   - [`POST /unlock/`](#unlock-smart-home) - Request access if PIN code setup for smart home 
 - IoT Devices
   - [`GET /devices/`](#get-all-iot-devices) - Get all devices (including querying)
@@ -27,13 +30,31 @@ Overview:
   - [`DELETE /goals/<goalId>/`](#delete-a-goal) - Delete a goal
 - Energy Records
   - [`GET /energy/`](#get-energy-usage) - Get energy records (including querying)
-- Daily Reports
-  - [`GET /reports/`](#get-daily-reports) - Get all reports' metadata (including querying)
-  - [`GET /reports/<reportId>/`](#get-full-report) - Get the full report
-  - [`DELETE /reports/<reportId>/`](#delete-a-report) - Delete a report
-- Daily Reminders
+- Accounts
+  - [`POST /accounts/login`](#login) - Log into an account
+  - [`POST /accounts/signup`](#sign-up-for-an-account) - Sign up for an accout
+- Tags
+  - [`GET /tags/`](#get-all-tags) - Retrieve all tags
+  - [`POST /tags/`](#add-a-new-tag) - Create a new tag
+  - [`DELETE /tags/`](#delete-a-tag) - Delete a tag
 
 ## General
+
+### Check if the Smart Home has a PIN enabled
+
+#### Request 
+
+```
+GET /api/unlock/
+```
+
+#### Response
+
+```
+{
+    "pinEnabled": false
+}
+```
 
 ### Unlock Smart Home
 
@@ -55,8 +76,9 @@ POST /api/unlock/
 #### Response
 
 ```
-Status 200 for correct pin code
-Status 500 for incorrect pin code
+{
+    "unlocked": false
+}
 ```
 
 ## IoT Devices
@@ -67,14 +89,15 @@ Fetches all IoT devices connected to the smart home.
 
 #### Request 
 
-| Parameter | Type    | Required | Description                          | Default   |
-| --------- | ------- | -------- | ------------------------------------ | --------- |
-| deviceId  | Integer | No       | Search for device with id            | No search |
-| name      | String  | No       | Search for device starting with name | No search |
-| status    | String  | No       | "Ok" \| "Fault"                      | Both      |
-| roomTag   | String  | No       | Tag name to search for               | No search |
-| userTag   | String  | No       | Tag name to search for               | No search |
-| customTag | String  | No       | Tag name to search for               | No search |
+| Parameter   | Type    | Required | Description                          | Default   |
+| ----------- | ------- | -------- | ------------------------------------ | --------- |
+| deviceId    | Integer | No       | Search for device with id            | No search |
+| name        | String  | No       | Search for device starting with name | No search |
+| status      | String  | No       | "On" \| "Off"                        | Both      |
+| faultStatus | String  | No       | "Ok" \| "Fault"                      | Both      |
+| roomTag     | String  | No       | Tag name to search for               | No search |
+| userTag     | String  | No       | Tag name to search for               | No search |
+| customTag   | String  | No       | Tag name to search for               | No search |
 
 ```
 GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&customTag=...
@@ -95,14 +118,15 @@ GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&c
                 "value": 2
             }
         ],
-        "status": ("Ok" | "Fault"),
+        "status": ("On" | "Off"),
+        "faultStatus": ("Ok" | "Fault"),
         "pinEnabled": true,
         "unlocked": false,
         "uptimeTimeStamp: "...",
         "ipAddress": "...",
         "roomTag": "Kitchen",
-        "userTags": ["Person1", "Person2"],
-        "customTags": ["Tag1", "Tag2"]
+        "userTags": ["Person1", "Person2", ...],
+        "customTags": ["Tag1", "Tag2", ...]
     }
 ]
 ```
@@ -156,7 +180,8 @@ POST /api/devices/
             "value": 2
         }
     ],
-    "status": ("Ok" | "Fault"),
+    "status": ("On" | "Off"),
+    "faultStatus": ("Ok" | "Fault"),
     "pinEnabled": true,
     "unlocked": false,
     "uptimeTimeStamp: "...",
@@ -216,7 +241,8 @@ PUT /api/devices/<deviceId>/
             "value": 2
         }
     ],
-    "status": ("Ok" | "Fault"),
+    "status": ("On" | "Off"),
+    "faultStatus": ("Ok" | "Fault"),
     "pinEnabled": true,
     "unlocked": false,
     "uptimeTimeStamp: "...",
@@ -276,6 +302,8 @@ Status 500 for incorrect pin code
 | ---------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | deviceId   | Integer | No       | Fetch only usage of device with device ID                                                                                                 |
 | timePeriod | String  | No       | ("Day", "Week", "Month", "Year"), fetches the usage from the last Day/Week/..., grouped Day: Hours, Week: Days, Month: Days, Year: Months |
+| rangeStart | Date    | No       | Start date of search range                                                                                                                |
+| rangeEnd   | Date    | No       | End date of search range                                                                                                                  |
 
 ```
 GET /api/devices/usage/?deviceId=0&timePeriod=Day
@@ -486,7 +514,7 @@ POST /api/goals/
 {
     "name": "NewGoal",
     "target": 250
-    "date": "19-03-25"
+    "date": "2025-01-30"
 }
 ```
 
@@ -499,7 +527,7 @@ POST /api/goals/
     "target": 250,
     "progress": 0,
     "complete": false
-    "date": "19-03-25"
+    "date": "2025-01-30"
 }
 ```
 
@@ -521,7 +549,7 @@ PUT /api/goals/<goalId>/
 {
     "name": "NewGoalName",
     "target": 300
-    "date": "19-03-25"
+    "date": "2025-01-30"
 }
 ```
 
@@ -534,7 +562,7 @@ PUT /api/goals/<goalId>/
     "target": 300,
     "progress": 0,
     "complete": false
-    "date": "19-03-25"
+    "date": "2025-01-30"
 }
 ```
 
@@ -561,10 +589,11 @@ Status 500 for failure
 
 #### Request 
 
-| Parameter  | Type   | Required | Description                                                                                                                               |
-| ---------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| timePeriod | String | No       | ("Day", "Week", "Month", "Year"), fetches the usage from the last Day/Week/..., grouped Day: Hours, Week: Days, Month: Days, Year: Months |
-
+| Parameter  | Type   | Required | Description                                                                                                                   |
+| ---------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| timePeriod | String | Yes      | ("Day", "Week", "Month", "Year") fetches data from the search range grouped Day: Hours, Week: Days, Month: Days, Year: Months |
+| startDate  | String | Yes      | Start date of search range                                                                                                    |
+| endDate    | String | Yes      | End date of search range                                                                                                      |
 
 ```
 GET /api/?timePeriod=Day
@@ -583,56 +612,23 @@ GET /api/?timePeriod=Day
 }
 ```
 
-## Daily Reports
+## Accounts
 
-### Get Daily Reports
-
+### Login 
 
 #### Request 
 
-```
-GET /api/reports/
-```
+| Parameter | Type   | Required |
+| --------- | ------ | -------- |
+| username  | String | Yes      |
+| password  | String | Yes      |
 
-#### Response
-
 ```
+POST /api/accounts/login/
 {
-    ...
+    "username": "..."
+    "password": "..."
 }
-```
-
-### Get Full Report 
-
-
-#### Request 
-
-| Parameter | Type   | Required | Description                                  |
-| --------- | ------ | -------- | -------------------------------------------- |
-| date      | String | Yes      | Get report associated with the date provided |
-
-```
-GET /api/reports/<reportId>/?date="2024-01-01"
-```
-
-#### Response
-
-```
-{
-    ...
-}
-```
-
-### Delete a Report
-
-#### Request 
-
-| Parameter | Type   | Required | Description                                  |
-| --------- | ------ | -------- | -------------------------------------------- |
-| date      | String | Yes      | Get report associated with the date provided |
-
-```
-DELETE /api/reports/<reportId>/
 ```
 
 #### Response
@@ -642,13 +638,95 @@ Status 200 for success
 Status 500 for failure
 ```
 
-## Daily Reminders
+### Sign up for an account
 
-Not intended to be implemented, included for reference.
+#### Request 
 
+| Parameter | Type   | Required |
+| --------- | ------ | -------- |
+| username  | String | Yes      |
+| password  | String | Yes      |
 
+```
+POST /api/accounts/signup/
+{
+    "username": "..."
+    "password": "..."
+}
+```
 
+#### Response
 
+```
+```
+
+## Tags
+
+### Get all tags
+
+#### Request 
+
+| Parameter | Type   | Required | Description                  |
+| --------- | ------ | -------- | ---------------------------- |
+| type      | String | Yes      | "User" \| "Room" \| "Custom" |
+
+```
+GET /api/tags/
+```
+
+#### Response
+
+```
+[
+    {
+        "tagId": 0,
+        "name": "..."
+    },
+    ...
+]
+```
+
+### Add a new tag
+
+#### Request 
+
+| Parameter | Type   | Required | Description                  |
+| --------- | ------ | -------- | ---------------------------- |
+| name      | String | Yes      | Name of tag                  |
+| type      | String | Yes      | "User" \| "Room" \| "Custom" |
+
+```
+POST /api/tags/
+```
+
+#### Response
+
+```
+{
+    "tagId": 0,
+    "name": "..."
+    "type": "User" | "Room" | "Custom"
+}
+```
+
+### Delete a tag
+
+#### Request 
+
+| Parameter | Type    | Required | Description                |
+| --------- | ------- | -------- | -------------------------- |
+| tagId     | Integer | Yes      | tagId of tag to be deleted |
+
+```
+DELETE /api/tags/
+```
+
+#### Response
+
+```
+Status 200 for success
+Status 500 for failure
+```
 
 <!-- 
 
@@ -658,9 +736,9 @@ Description
 
 #### Request 
 
-| Parameter | Type | Required | Description | Default |
-| --------- | ---- | -------- | ----------- | ------- |
-|           |      |          |             |         |
+| Parameter | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+|           |      |          |             |
 
 ```
 GET /api/
