@@ -15,9 +15,32 @@ def automations_handler():
         return post_automations_handler()
     return jsonify({"Error": "Invalid"}), 500
 
-
+#http://127.0.0.1:5000/api/automations/
 def get_automations_handler():
-    return jsonify({"endpoint": "GET_automations_handler"}), 200
+    #deviceID stuff to be added later
+    statement = select(Automations)
+
+    with db.engine.connect() as conn:
+        results = conn.execute(statement)
+    
+    data_to_send = []
+    for result in results:
+        (
+            automationId,
+            deviceId,
+            dateTime,
+            newState,
+        ) = result
+    
+        package = {
+            "automationId": automationId,
+            "deviceId": deviceId,
+            "dateTime": dateTime,
+            "newState": newState,
+        }
+
+        data_to_send.append(package)
+    return jsonify(data_to_send), 200
 
 
 def post_automations_handler():
