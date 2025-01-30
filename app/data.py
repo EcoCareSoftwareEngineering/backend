@@ -72,6 +72,29 @@ def add_data():
         if tag_data:
             conn.execute(insert(Tags), tag_data)
             
+        # Data for IotDevicesTags (device and tag)
+        device_tag_rows = []
+        try:
+            with open("data/iot_devices_tags.csv", "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                device_tag_rows.extend([row for row in reader])
+        except Exception as e:
+            print(f"Error reading CSV file: {e}")   
+        
+        device_tag_data = []
+        
+        for row in device_tag_rows:
+            try:
+                row["deviceId"] = int(row["deviceId"])
+                row["tagId"] = int(row["tagId"])
+                device_tag_data.append({key: value for key, value in row.items() if value !=""})
+            except Exception as e:
+                print(f"Error processing device_tag row: {row}, Error: {e}") 
+                continue
+            
+        if device_tag_data:
+            conn.execute(insert(IotDevicesTags), device_tag_data)                 
+        
         conn.commit()
 
 
