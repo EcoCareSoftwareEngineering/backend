@@ -1,5 +1,6 @@
 from sqlalchemy import select, insert, text, update, delete
 import csv, json
+import datetime as datetime
 
 from . import db
 from .models import *
@@ -18,6 +19,8 @@ def delete_data_from_db():
         conn.execute(text("ALTER TABLE tags AUTO_INCREMENT = 0;"))
         conn.execute(delete(IotDevicesTags))
         conn.execute(text("ALTER TABLE iot_devices_tags AUTO_INCREMENT = 0;"))
+        conn.execute(delete(IotDeviceUsage))
+        conn.execute(text("ALTER TABLE iot_device_usage AUTO_INCREMENT = 0;"))
 
         # TODO Finish deleting data
         # TODO Reset autoincrement values to 0
@@ -62,7 +65,7 @@ def add_data():
         for row in tag_rows:
             try:
                 row["tagId"] = int(row["tagId"])
-                row["tagType"] = TagType[row["tagType"]].name
+                row["tagType"] = TagType[row["tagType"]].name # Might need to change from String to Enum here
             
                 tag_data.append({key: value for key, value in row.items() if value !=""})
             except Exception as e:
@@ -95,6 +98,35 @@ def add_data():
         if device_tag_data:
             conn.execute(insert(IotDevicesTags), device_tag_data)                 
         
+        # Data for IotDeviceUsage 
+        device_usage_rows =[]
+        try:
+            with open("data/iot_device_usage.csv", "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                device_usage_rows.extend([row for row in reader])
+        except Exception as e:
+            print(f"Error reading CSV file: {e}")
+        
+        device_usage_data = []
+        
+        for row in device_usage_rows:
+            try:
+                row["deviceUsageId"] = int(row["deviceUsageId"])
+                row["date"] = row["date"] # Date format yyyy-mm-dd
+                row["hour"] = int(row["hour"])
+                row["usage"] = int(row["usage"])
+                row["deviceId"] = int(row["deviceId"]) if row["deviceId"] else None
+                device_usage_data.append({key: value for key, value in row.items() if value !=""})
+                
+            except Exception as e:
+                print(f"Error processing IotDeviceUsage row {row}, Error: {e} ")
+        
+        if device_usage_data:
+            try:
+                conn.execute(insert(IotDeviceUsage), device_usage_data)
+            except Exception as e:
+                print(f"Error inserting IotDeviceUsage data in the db: {e}")
+                
         conn.commit()
 
 
