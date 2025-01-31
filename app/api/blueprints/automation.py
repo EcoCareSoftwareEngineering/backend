@@ -17,8 +17,10 @@ def automations_handler():
 
 #http://127.0.0.1:5000/api/automations/
 def get_automations_handler():
-    #deviceID stuff to be added later
-    statement = select(Automations)
+    if request.args.get("deviceId") is None:
+        statement = select(Automations)
+    else:
+        statement = select(Automations).where(Automations.deviceId == request.args.get("deviceId"))
 
     with db.engine.connect() as conn:
         results = conn.execute(statement)
