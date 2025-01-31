@@ -13,12 +13,12 @@ def reset_db():
 
 def delete_data_from_db():
     with db.engine.connect() as conn:
+        conn.execute(delete(IotDevicesTags))
+        conn.execute(text("ALTER TABLE iot_devices_tags AUTO_INCREMENT = 0;"))
         conn.execute(delete(IotDevices))
         conn.execute(text("ALTER TABLE iot_devices AUTO_INCREMENT = 0;"))
         conn.execute(delete(Tags))
         conn.execute(text("ALTER TABLE tags AUTO_INCREMENT = 0;"))
-        conn.execute(delete(IotDevicesTags))
-        conn.execute(text("ALTER TABLE iot_devices_tags AUTO_INCREMENT = 0;"))
         conn.execute(delete(IotDeviceUsage))
         conn.execute(text("ALTER TABLE iot_device_usage AUTO_INCREMENT = 0;"))
 
