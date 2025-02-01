@@ -25,7 +25,7 @@ def get_automations_handler():
     with db.engine.connect() as conn:
         results = conn.execute(statement)
     
-    data_to_send = []
+    response = []
     for result in results:
         (
             automationId,
@@ -41,8 +41,8 @@ def get_automations_handler():
             "newState": newState,
         }
 
-        data_to_send.append(package)
-    return jsonify(data_to_send), 200
+        response.append(package)
+    return jsonify(response), 200
 
 
 def post_automations_handler():
@@ -51,9 +51,9 @@ def post_automations_handler():
 
 @automations_blueprint.route("/<int:automation_id>/", methods=["PUT", "DELETE"])
 def automations_update_handler(automation_id: int):
-    if request.method == "GET":
+    if request.method == "PUT":
         return put_automations_update_handler(automation_id)
-    elif request.method == "POST":
+    elif request.method == "DELETE":
         return delete_automations_update_handler(automation_id)
     return jsonify({"Error": "Invalid"}), 500
 
@@ -63,4 +63,10 @@ def put_automations_update_handler(automation_id: int):
 
 
 def delete_automations_update_handler(automation_id: int):
-    return jsonify({"endpoint": "DELETE_automations_update_handler"}), 200
+    statement = delete(Automations).where(Automations.automationId == request.args.get("automationId"))
+    with db.engine.connect() as conn:
+        results = conn.execute(statement)
+    if results.rowcount > 0: #if this has deleted anything return 200 
+        return jsonify(), 200
+    else: #if we failed to delete anything return 500
+        return jsonify(), 500
