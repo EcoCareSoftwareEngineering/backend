@@ -46,7 +46,37 @@ def get_automations_handler():
 
 
 def post_automations_handler():
-    return jsonify({"endpoint": "POST_automations_handler"}), 200
+    jsonresult = request.get_json(force=True)
+    statement = insert(Automations).values(
+        deviceId=jsonresult["deviceId"],
+        dateTime=jsonresult["dateTime"],
+        newState=jsonresult["newState"] #assuming the newState passed in is a dictionary I should be able to do this?
+        ).returning(Automations.automationId)
+    
+    with db.engine.connect() as conn:
+        newId = conn.execute(statement)
+    
+    statement = select(Automations).where(Automations.deviceId == newId)
+    with db.engine.connect() as conn:
+        results = conn.execute(statement)
+    response = []
+    for result in results:
+        (
+            automationId,
+            deviceId,
+            dateTime,
+            newState,
+        ) = result
+
+        package = {
+            "automationId": automationId,
+            "deviceId": deviceId,
+            "dateTime": dateTime,
+            "newState": newState,
+        }
+
+        response.append(package)
+    return jsonify(response), 200
 
 
 @automations_blueprint.route("/<int:automation_id>/", methods=["PUT", "DELETE"])
