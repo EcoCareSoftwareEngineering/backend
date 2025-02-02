@@ -44,39 +44,47 @@ def get_automations_handler():
         response.append(package)
     return jsonify(response), 200
 
-
+#curl -X POST -H "Content-Type: application/json" -d '{"deviceId": 2, "dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/
 def post_automations_handler():
-    jsonresult = request.get_json(force=True)
-    statement = insert(Automations).values(
-        deviceId=jsonresult["deviceId"],
-        dateTime=jsonresult["dateTime"],
-        newState=jsonresult["newState"] #assuming the newState passed in is a dictionary I should be able to do this?
-        ).returning(Automations.automationId)
-    
-    with db.engine.connect() as conn:
-        newId = conn.execute(statement)
-    
-    statement = select(Automations).where(Automations.deviceId == newId)
-    with db.engine.connect() as conn:
-        results = conn.execute(statement)
-    response = []
-    for result in results:
-        (
-            automationId,
-            deviceId,
-            dateTime,
-            newState,
-        ) = result
+    jsonresult = request.get_json(silent=True)
+    if jsonresult == None: #since I set silent = True, this should return None if the data given isn't application/json and also if the get_json fails.
+        return jsonify({"oh no": "whoops"}), 500 #to be made into jsonify(), 500 later
+    else:
+        jsonresult = request.get_json(force=True)
+        if not (isinstance(jsonresult.get("deviceId"), int) and isinstance(jsonresult.get("dateTime"), str) and 
+        isinstance(jsonresult.get("newState")[0], str) and isinstance(jsonresult.get("newState")[1], str) and isinstance(jsonresult.get("newState")[2], int)):
+            return jsonify({"oh no": "wrong type!"}), 500
+        else:
+            statement = insert(Automations).values(
+                deviceId=jsonresult["deviceId"],
+                dateTime=jsonresult["dateTime"],
+                newState=jsonresult["newState"] #assuming the newState passed in is a dictionary I should be able to do this?
+                ).returning(Automations.automationId)
+            
+            with db.engine.connect() as conn:
+                newId = conn.execute(statement)
+            
+            statement = select(Automations).where(Automations.deviceId == newId)
+            with db.engine.connect() as conn:
+                results = conn.execute(statement)
+            response = []
+            for result in results:
+                (
+                    automationId,
+                    deviceId,
+                    dateTime,
+                    newState,
+                ) = result
 
-        package = {
-            "automationId": automationId,
-            "deviceId": deviceId,
-            "dateTime": dateTime,
-            "newState": newState,
-        }
+                package = {
+                    "automationId": automationId,
+                    "deviceId": deviceId,
+                    "dateTime": dateTime,
+                    "newState": newState,
+                }
 
-        response.append(package)
-    return jsonify(response), 200
+                response.append(package)
+            return jsonify(response), 200
 
 
 @automations_blueprint.route("/<int:automation_id>/", methods=["PUT", "DELETE"])
