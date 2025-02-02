@@ -162,7 +162,7 @@ def add_data():
         energy_saving_goal_rows = []
         try:
             with open("data/energy_saving_goals.csv", "r") as csvfile:
-                csv.DictReader(csvfile)
+                reader = csv.DictReader(csvfile)
                 energy_saving_goal_rows.extend([row for row in reader])
         except Exception as e:
             print(f"Error reading CSV file for EnergySavingGoals : {e}")
