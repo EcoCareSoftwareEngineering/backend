@@ -25,7 +25,8 @@ def delete_data_from_db():
         conn.execute(text("ALTER TABLE iot_device_usage AUTO_INCREMENT = 0;"))
         conn.execute(delete(EnergySavingGoals))
         conn.execute(text("ALTER TABLE energy_saving_goals AUTO_INCREMENT = 0;"))
-        
+        conn.execute(delete(EnergyRecords))
+        conn.execute(text("ALTER TABLE energy_records AUTO_INCREMENT = 0;"))
 
         # TODO Finish deleting data
         # TODO Reset autoincrement values to 0
@@ -186,7 +187,31 @@ def add_data():
                 print(f"Error inserting EnergySavingGoals data in the db: {e}")
                 
         # Data for EnergyRecotds
+        energy_record_rows = []
+        try:
+            with open("data/energy_records.csv", "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                energy_record_rows.extend([row for row in reader])
+        except Exception as e:
+            print(f"Error reading CSV file for EnergyRecords : {e}")
         
+        energy_record_data = []
+        for row in energy_record_rows:
+            try:
+                row["energyRecordId"] = int(row["energyRecordId"])
+                row["date"] = row["date"]
+                row["hour"] = int(row["hour"])
+                row["energyUse"] = float(row["energyUse"])
+                row["energyGeneration"] = float(row["energyGeneration"])
+                energy_record_data.append({key: value for key, value in row.items() if value !=""})
+            except Exception as e:
+                print(f"Error processing EnergyRecords row: {row}, Error: {e}")
+        if energy_record_data:
+            try:
+                conn.execute(insert(EnergyRecords), energy_record_data)
+            except Exception as e:
+                print(f"Error inserting EnergyRecords data in the db: {e}")
+                
         # Data for Users
         
                 
