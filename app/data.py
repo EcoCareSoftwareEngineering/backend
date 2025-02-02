@@ -27,6 +27,8 @@ def delete_data_from_db():
         conn.execute(text("ALTER TABLE energy_saving_goals AUTO_INCREMENT = 0;"))
         conn.execute(delete(EnergyRecords))
         conn.execute(text("ALTER TABLE energy_records AUTO_INCREMENT = 0;"))
+        conn.execute(delete(Users))
+        conn.execute(text("ALTER TABLE users AUTO_INCREMENT = 0;"))
 
         # TODO Finish deleting data
         # TODO Reset autoincrement values to 0
@@ -213,7 +215,28 @@ def add_data():
                 print(f"Error inserting EnergyRecords data in the db: {e}")
                 
         # Data for Users
+        user_rows = []
+        try:
+            with open("data/users.csv", "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                user_rows.extend([row for row in reader])
+        except Exception as e:
+            print(f"Error reading CSV file for Users: {e}")
         
+        user_data = []
+        for row in user_rows:
+            try:
+                row["userId"] = int(row["userId"])
+                row["name"] = row["name"]
+                row["passwordHash"] = row["passwordHash"]
+                energy_record_data.append({key: value for key, value in row.items() if value !=""})
+            except Exception as e:
+                print(f"Error processing Users row: {row}, Error: {e}")
+        if user_data:
+            try:
+                conn.execute(insert(Users), user_data)
+            except Exception as e:
+                print(f"Error inserting Users data in the db: {e}")             
                 
         conn.commit()
 
