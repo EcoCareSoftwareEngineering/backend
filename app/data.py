@@ -15,12 +15,17 @@ def delete_data_from_db():
     with db.engine.connect() as conn:
         conn.execute(delete(IotDevicesTags))
         conn.execute(text("ALTER TABLE iot_devices_tags AUTO_INCREMENT = 0;"))
+        conn.execute(delete(Automations))
+        conn.execute(text("ALTER TABLE automations AUTO_INCREMENT = 0;"))
         conn.execute(delete(IotDevices))
         conn.execute(text("ALTER TABLE iot_devices AUTO_INCREMENT = 0;"))
         conn.execute(delete(Tags))
         conn.execute(text("ALTER TABLE tags AUTO_INCREMENT = 0;"))
         conn.execute(delete(IotDeviceUsage))
         conn.execute(text("ALTER TABLE iot_device_usage AUTO_INCREMENT = 0;"))
+        conn.execute(delete(EnergySavingGoals))
+        conn.execute(text("ALTER TABLE energy_saving_goals AUTO_INCREMENT = 0;"))
+        
 
         # TODO Finish deleting data
         # TODO Reset autoincrement values to 0
@@ -154,7 +159,32 @@ def add_data():
                 print(f"Error inserting Automations data in the ds: {e}")
         
         # Data for EnergySavingGoals
+        energy_saving_goal_rows = []
+        try:
+            with open("data/energy_saving_goals.csv", "r") as csvfile:
+                csv.DictReader(csvfile)
+                energy_saving_goal_rows.extend([row for row in reader])
+        except Exception as e:
+            print(f"Error reading CSV file for EnergySavingGoals : {e}")
         
+        energy_saving_goal_data = []
+        for row in energy_saving_goal_rows:
+            try:
+                row["goalId"] = int(row["goalId"])
+                row["name"] = row["name"]
+                row["target"] = float(row["goalId"])
+                row["progress"] = float(row["progress"])
+                row["complete"] = bool(row["complete"])
+                row["date"] = row["date"]
+                energy_saving_goal_data.append({key: value for key, value in row.items() if value !=""})
+            except Exception as e:
+                print(f"Error processing EnergySavingGoals row: {row}, Error: {e}")
+        if energy_saving_goal_data:
+            try:
+                conn.execute(insert(EnergySavingGoals), energy_saving_goal_data)
+            except Exception as e:
+                print(f"Error inserting EnergySavingGoals data in the db: {e}")
+                
         # Data for EnergyRecotds
         
         # Data for Users
