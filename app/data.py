@@ -31,13 +31,13 @@ def delete_data_from_db():
 def add_data():
     with db.engine.connect() as conn:
 
-        rows = []
+        device_rows = []
         with open("data/iot_devices.csv", "r") as csvfile:
             reader = csv.DictReader(csvfile)
-            rows.extend([row for row in reader])
+            device_rows.extend([row for row in reader])
 
-        data = []
-        for row in rows:
+        device_data = []
+        for row in device_rows:
             row["deviceId"] = int(row["deviceId"])
             row["state"] = json.loads(row["state"])
             for entry in row["state"]:
@@ -45,11 +45,11 @@ def add_data():
                     entry["value"] = int(entry["value"])
             row["unlocked"] = bool(row["unlocked"])
 
-            data.append({key: value for key, value in row.items() if value != ""})
+            device_data.append({key: value for key, value in row.items() if value != ""})
 
         # TODO Add data to rest of tables
 
-        conn.execute(insert(IotDevices), data)
+        conn.execute(insert(IotDevices), device_data)
         
         # Data for tags
         tag_rows = []
@@ -126,6 +126,38 @@ def add_data():
                 conn.execute(insert(IotDeviceUsage), device_usage_data)
             except Exception as e:
                 print(f"Error inserting IotDeviceUsage data in the db: {e}")
+        
+        # Data for Automations
+        automation_rows = []
+        try:
+            with open("data/automations.csv", "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                automation_rows.extend([row for row in reader])
+        except Exception as e:
+            print(f"Error reading CSV file for Automations: {e}")
+            
+        automation_data = []
+        for row in automation_rows:
+            try:
+                row["deviceId"] = int(row["deviceId"])
+                row["dateTime"] = datetime.strptime(row["dateTime"],  "%Y-%m-%d %H:%M:%S")
+                row["newState"] = json.loads(row["newState"])
+                automation_data.append({key: value for key, value in row.items() if value !=""})
+            except Exception as e:
+                print(f"Error processing Automation row: {row},  Errror: {e}")    
+        
+        if automation_data:
+            try:
+                conn.execute(insert(Automations), automation_data)
+            except Exception as e:
+                print(f"Error inserting Automations data in the ds: {e}")
+        
+        # Data for EnergySavingGoals
+        
+        # Data for EnergyRecotds
+        
+        # Data for Users
+        
                 
         conn.commit()
 
