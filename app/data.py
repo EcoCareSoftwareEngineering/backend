@@ -141,7 +141,7 @@ def add_data():
             try:
                 row["automationId"] = int(row["automationId"])
                 row["deviceId"] = int(row["deviceId"])
-                row["dateTime"] = datetime.strptime(row["dateTime"],  "%Y-%m-%d %H:%M:%S")
+                row["dateTime"] = row["dateTime"]
                 row["newState"] = json.loads(row["newState"])
                 automation_data.append({key: value for key, value in row.items() if value !=""})
             except Exception as e:
