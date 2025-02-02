@@ -139,6 +139,7 @@ def add_data():
         automation_data = []
         for row in automation_rows:
             try:
+                row["automationId"] = int(row["automationId"])
                 row["deviceId"] = int(row["deviceId"])
                 row["dateTime"] = datetime.strptime(row["dateTime"],  "%Y-%m-%d %H:%M:%S")
                 row["newState"] = json.loads(row["newState"])
