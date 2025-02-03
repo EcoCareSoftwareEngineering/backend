@@ -99,9 +99,9 @@ def automations_update_handler(automation_id: int):
 def put_automations_update_handler(automation_id: int):
     return jsonify({"endpoint": "PUT_automations_update_handler"}), 200
 
-# curl -X DELETE -d "automationId=3" http://127.0.0.1:5000/api/automations/3/
+# curl -X DELETE http://127.0.0.1:5000/api/automations/3/
 def delete_automations_update_handler(automation_id: int):
-    statement = delete(Automations).where(Automations.automationId == request.args.get("automationId"))
+    statement = delete(Automations).where(Automations.automationId == automation_id)
     with db.engine.connect() as conn:
         results = conn.execute(statement)
     if results.rowcount > 0: #if this has deleted anything return 200 
