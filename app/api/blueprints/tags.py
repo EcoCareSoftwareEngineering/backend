@@ -43,7 +43,41 @@ def get_tags_handler():
        
 # POST - create a new tag
 def post_tags_handler():
-    pass
+    try:
+        # Get data from request
+        data = request.get_json()
+        
+        print(f"Request Data: {data}") 
+        
+        #Validate the input data
+        if not data or not all(key in data for key in ["name", "tagType"]):
+            return jsonify({"Error": "Mising requesried fields: name, tagType"}), 400
+        
+        # Handle tagType from string to enum
+        try:
+            tagType = TagType[data["tagType"]]
+        except KeyError:
+            return jsonify({"Error": "Invalid tagType value"}), 400
+        
+        # Create a new Tag object
+        new_tag = Tags(name=data["name"], tagType=tagType)
+        
+        # Add and commit
+        db.session.add(new_tag)
+        db.session.commit()
+        
+        print(f"Created tag: {new_tag.name} with ID {new_tag.tagId}")
+        
+        # Return the created nw tag
+        return jsonify({
+            "message": "Tag created successfully",
+            "tagId": new_tag.tagId,
+            "name": new_tag.name,
+            "tagType": new_tag.tagType.name
+        }), 201
+        
+    except Exception as e:
+        return jsonify({"Error": str(e)})
 
 # GET, PUT, DELETE - get/update/delete tags
 @tags_blueprint.route("/<int:tag_id>", methods=["GET", "PUT", "DELETE"])
