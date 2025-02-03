@@ -77,9 +77,39 @@ def get_tag_by_id(tag_id):
     
 # PUT - update tag
 def update_tag_handler(tag_id: int):
-    return(
-        jsonify({"endpoint": "PUT_tags_handler", "tagId": tag_id}, 200)
-    )
+    try:
+        # Get data from request
+        data = request.get_json()
+        
+        # Validate the input data
+        if not data or not all(key in data for key in ["name", "tagType"]):
+            return jsonify({"Error": "Missing required fields: name, tagType"}, 400)
+        
+        # Get tag from db
+        tag = db.session.query(Tags).get(tag_id)
+        
+        if not tag:
+            return jsonify({"Error": f"Tag with id {tag_id} not found."}, 404)
+        
+        # Handle tagType from string to enum
+        tagType = TagType[data["tagType"]]
+        
+        # Update the tag field
+        tag.name = data["name"]
+        tag.tagType = tagType
+        
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Tag updated successfully",
+            "tagId": tag.tagId,
+            "name": tag.name,
+            "tagType": tag.tagType.name
+        }, 200)
+    except KeyError:
+        return jsonify({"Error": "Invalid tagType value"}, 400)
+    except Exception as e:
+        return jsonify({"Error": str(e)})
     
 # DELETE - delete tag
 def delete_tag_handler(tag_id: int):
