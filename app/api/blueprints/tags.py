@@ -113,6 +113,17 @@ def update_tag_handler(tag_id: int):
     
 # DELETE - delete tag
 def delete_tag_handler(tag_id: int):
-    return(
-        jsonify({"endpoint": "DELETE_tags_handler", "tagId": tag_id}, 200)
-    )
+    try:
+      # Get tag from db
+      tag = db.session.query(Tags).get(tag_id)
+      
+      if not tag:
+        return jsonify({"Error": f"Tag with id {tag_id} not found"}, 404)
+      # Delete tag
+      db.session.delete(tag)
+      db.session.commit()
+      
+      # Return success message
+      return jsonify({"message": f"Tag with id {tag_id} deleted successfully."}), 200  
+    except Exception as e:
+        return jsonify({"Error": str(e)})
