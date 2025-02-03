@@ -14,8 +14,17 @@ def goals_handler():
     return jsonify({"endpoint": "GET_goals_handler"}), 500
 
 def get_goals_handler():
+    if request.args.get("complete") == "true":
+        statement = select(EnergySavingGoals).where(
+            EnergySavingGoals.complete == "true"
+        )
+    elif request.args.get("complete") == "false":
+        statement = select(EnergySavingGoals).where(
+            EnergySavingGoals.complete == "false"
+        )
+    else:
+        statement = select(EnergySavingGoals)
 
-    statement = select(EnergySavingGoals)
 
     with db.engine.connect() as conn:
         results = conn.execute(statement)
