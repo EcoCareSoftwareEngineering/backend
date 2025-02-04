@@ -1,7 +1,7 @@
-deviceId,name,description,state,status,faultStatus,pinCode,unlocked,uptimeTimeStamp,ipAddress
-1,Smart Light,A smart lightbulb,"[{""fieldName"": ""hue"", ""datatype"": ""integer"",""value"": ""2""}]",On,Ok,,True,,192.168.0.2
-2,Smart TV,A smart tv,"[{""fieldName"": ""channel"", ""datatype"": ""integer"",""value"": ""3""}]",On,Ok,,True,,192.168.0.3
-3,Thermostat,Central Heating Thermostat,"[{""fieldName"": ""temperature"", ""datatype"": ""float"",""value"": ""18.0""}]",On,Ok,,True,,192.168.0.4
-4,Smart Fridge,A smart fridge,,On,Ok,,True,,192.168.0.5
-5,Radio and Speaker,Radio and Bluetooth Speaker ,"[{""fieldName"": ""station"", ""datatype"": ""integer"",""value"": ""3""}]",Off,Ok,,True,,192.168.0.6
-6,Hall Light,A smart lightbulb,,On,Ok,,True,,192.168.0.7
+deviceId,name,description,state,status,faultStatus,pinCode,unlocked,uptimeTimestamp,ipAddress
+1,Smart Light,A smart lightbulb,"[{""fieldName"": ""hue"", ""datatype"": ""integer"", ""value"": ""2""}]",On,Ok,,True,,192.168.0.2
+2,Smart TV,A smart tv,"[{""fieldName"": ""channel"", ""datatype"": ""integer"", ""value"": ""3""}]",On,Ok,,True,,192.168.0.3
+3,Thermostat,Central Heating Thermostat,"[{""fieldName"": ""temperature"", ""datatype"": ""float"", ""value"": ""18.0""}]",On,Ok,,True,,192.168.0.4
+4,Smart Fridge,A smart fridge,"{}",On,Ok,,True,,192.168.0.5
+5,Radio and Speaker,Radio and Bluetooth Speaker ,"[{""fieldName"": ""station"", ""datatype"": ""integer"", ""value"": ""3""}]",Off,Ok,,True,,192.168.0.6
+6,Hall Light,A smart lightbulb,"{}",On,Ok,,True,,192.168.0.7

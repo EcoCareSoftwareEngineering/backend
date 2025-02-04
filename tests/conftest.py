@@ -2,7 +2,7 @@ import csv
 import json
 import pytest
 import requests
-from ..app.models import TagType
+from app.models import TagType
 
 
 @pytest.fixture(autouse=True, scope="function")
@@ -68,7 +68,7 @@ def energy_saving_goals_data():
 @pytest.fixture(scope="session")
 def iot_device_usage_data():
     rows = []
-    with open("data/energy_records.csv", "r") as csvfile:
+    with open("data/iot_device_usage.csv", "r") as csvfile:
         reader = csv.DictReader(csvfile)
         rows.extend([row for row in reader])
 
@@ -112,6 +112,8 @@ def iot_devices_data():
         for entry in row["state"]:
             if entry["datatype"] == "integer":
                 entry["value"] = int(entry["value"])
+            if entry["datatype"] == "float":
+                entry["value"] = float(entry["value"])
 
         entry = {
             "deviceId": int(row["deviceId"]),
