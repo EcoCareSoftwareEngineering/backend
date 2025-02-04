@@ -12,6 +12,76 @@ def config():
 
 
 @pytest.fixture(scope="session")
+def automations_data():
+    rows = []
+    with open("data/automations.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows.extend([row for row in reader])
+
+    data = []
+    for row in rows:
+        pass
+
+    return data
+
+
+@pytest.fixture(scope="session")
+def energy_records_data():
+    rows = []
+    with open("data/energy_records.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows.extend([row for row in reader])
+
+    data = []
+    for row in rows:
+        pass
+
+    return data
+
+
+@pytest.fixture(scope="session")
+def energy_saving_goals_data():
+    rows = []
+    with open("data/energy_saving_goals.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows.extend([row for row in reader])
+
+    data = []
+    for row in rows:
+        pass
+
+    return data
+
+
+@pytest.fixture(scope="session")
+def iot_device_usage_data():
+    rows = []
+    with open("data/energy_records.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows.extend([row for row in reader])
+
+    data = []
+    for row in rows:
+        pass
+
+    return data
+
+
+@pytest.fixture(scope="session")
+def iot_devices_tags_data():
+    rows = []
+    with open("data/iot_devices_tags.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows.extend([row for row in reader])
+
+    data = []
+    for row in rows:
+        pass
+
+    return data
+
+
+@pytest.fixture(scope="session")
 def iot_devices_data():
     rows = []
     with open("data/iot_devices.csv", "r") as csvfile:
@@ -34,14 +104,37 @@ def iot_devices_data():
             "faultStatus": row["faultStatus"],
             "pinEnabled": row["pinCode"] != "",
             "unlocked": bool(row["unlocked"]),
-            "uptimeTimestamp": (
-                row["uptimeTimestamp"] if "uptimeTimestamp" in row else None
-            ),
-            "ipAddress": row["ipAddress"] if "ipAddress" in row else None,
+            "uptimeTimestamp": row["uptimeTimestamp"],
+            "ipAddress": row["ipAddress"],
         }
         data.append(entry)
 
     return data
 
 
-# TODO add other fixtures for every csv file - copy code from data.py
+@pytest.fixture(scope="session")
+def tags_data():
+    rows = []
+    with open("data/tags.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows.extend([row for row in reader])
+
+    data = []
+    for row in rows:
+        pass
+
+    return data
+
+
+@pytest.fixture(scope="session")
+def users_data():
+    rows = []
+    with open("data/users.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        rows.extend([row for row in reader])
+
+    data = []
+    for row in rows:
+        pass
+
+    return data
