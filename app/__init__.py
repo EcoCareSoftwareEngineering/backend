@@ -27,7 +27,6 @@ def create_app():
 
     db.init_app(app)
     Migrate(app, db)
-
     CORS(app)
 
     with app.app_context():
