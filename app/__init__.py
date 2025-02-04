@@ -2,6 +2,7 @@ import os, json
 from flask import Flask
 from flask_migrate import Migrate, init, migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from alembic import autogenerate
 from alembic.migration import MigrationContext
 
@@ -26,6 +27,8 @@ def create_app():
 
     db.init_app(app)
     Migrate(app, db)
+
+    CORS(app)
 
     with app.app_context():
         if not os.path.exists(os.path.join(os.getcwd(), "migrations")):
