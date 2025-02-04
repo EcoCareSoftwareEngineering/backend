@@ -236,8 +236,7 @@ def add_data():
         for row in user_rows:
             try:
                 row["userId"] = int(row["userId"])
-                row["passwordHash"] = row["passwordHash"]
-                energy_record_data.append(
+                user_data.append(
                     {key: value for key, value in row.items() if value != ""}
                 )
             except Exception as e:

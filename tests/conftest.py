@@ -2,6 +2,7 @@ import csv
 import json
 import pytest
 import requests
+from ..app.models import TagType
 
 
 @pytest.fixture(autouse=True, scope="function")
@@ -20,7 +21,10 @@ def automations_data():
 
     data = []
     for row in rows:
-        pass
+        row["automationId"] = int(row["automationId"])
+        row["deviceId"] = int(row["deviceId"])
+        row["newState"] = json.loads(row["newState"])
+        data.append({key: value for key, value in row.items() if value != ""})
 
     return data
 
@@ -34,7 +38,11 @@ def energy_records_data():
 
     data = []
     for row in rows:
-        pass
+        row["energyRecordId"] = int(row["energyRecordId"])
+        row["hour"] = int(row["hour"])
+        row["energyUse"] = float(row["energyUse"])
+        row["energyGeneration"] = float(row["energyGeneration"])
+        data.append({key: value for key, value in row.items() if value != ""})
 
     return data
 
@@ -48,7 +56,11 @@ def energy_saving_goals_data():
 
     data = []
     for row in rows:
-        pass
+        row["goalId"] = int(row["goalId"])
+        row["target"] = float(row["goalId"])
+        row["progress"] = float(row["progress"])
+        row["complete"] = bool(row["complete"])
+        data.append({key: value for key, value in row.items() if value != ""})
 
     return data
 
@@ -62,7 +74,11 @@ def iot_device_usage_data():
 
     data = []
     for row in rows:
-        pass
+        row["deviceUsageId"] = int(row["deviceUsageId"])
+        row["hour"] = int(row["hour"])
+        row["usage"] = int(row["usage"])
+        row["deviceId"] = int(row["deviceId"]) if row["deviceId"] else None
+        data.append({key: value for key, value in row.items() if value != ""})
 
     return data
 
@@ -76,7 +92,9 @@ def iot_devices_tags_data():
 
     data = []
     for row in rows:
-        pass
+        row["deviceId"] = int(row["deviceId"])
+        row["tagId"] = int(row["tagId"])
+        data.append({key: value for key, value in row.items() if value != ""})
 
     return data
 
@@ -121,7 +139,9 @@ def tags_data():
 
     data = []
     for row in rows:
-        pass
+        row["tagId"] = int(row["tagId"])
+        row["tagType"] = TagType[row["tagType"]].name
+        data.append({key: value for key, value in row.items() if value != ""})
 
     return data
 
@@ -135,6 +155,7 @@ def users_data():
 
     data = []
     for row in rows:
-        pass
+        row["userId"] = int(row["userId"])
+        data.append({key: value for key, value in row.items() if value != ""})
 
     return data
