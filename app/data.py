@@ -42,7 +42,7 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 device_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file: {e}")
+            print(f"Error reading CSV file 'iot_devices.csv' with error: {e}")
 
         device_data = []
         for row in device_rows:
@@ -66,26 +66,15 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 tag_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file: {e}")
+            print(f"Error reading CSV file 'tags.csv' with error: {e}")
 
         tag_data = []
-
         for row in tag_rows:
-            try:
-                row["tagId"] = int(row["tagId"])
-                row["tagType"] = TagType[
-                    row["tagType"]
-                ].name  # Might need to change from String to Enum here
+            row["tagId"] = int(row["tagId"])
+            row["tagType"] = TagType[row["tagType"]]
+            tag_data.append({key: value for key, value in row.items() if value != ""})
 
-                tag_data.append(
-                    {key: value for key, value in row.items() if value != ""}
-                )
-            except Exception as e:
-                print(f"Error processing tag row: {row}, Error: {e}")
-                continue
-
-        if tag_data:
-            conn.execute(insert(Tags), tag_data)
+        conn.execute(insert(Tags), tag_data)
 
         # Data for IotDevicesTags (device and tag)
         device_tag_rows = []
@@ -94,23 +83,17 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 device_tag_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file: {e}")
+            print(f"Error reading CSV file 'iot_device_tags.csv' with error {e}")
 
         device_tag_data = []
-
         for row in device_tag_rows:
-            try:
-                row["deviceId"] = int(row["deviceId"])
-                row["tagId"] = int(row["tagId"])
-                device_tag_data.append(
-                    {key: value for key, value in row.items() if value != ""}
-                )
-            except Exception as e:
-                print(f"Error processing device_tag row: {row}, Error: {e}")
-                continue
+            row["deviceId"] = int(row["deviceId"])
+            row["tagId"] = int(row["tagId"])
+            device_tag_data.append(
+                {key: value for key, value in row.items() if value != ""}
+            )
 
-        if device_tag_data:
-            conn.execute(insert(IotDevicesTags), device_tag_data)
+        conn.execute(insert(IotDevicesTags), device_tag_data)
 
         # Data for IotDeviceUsage
         device_usage_rows = []
@@ -119,28 +102,19 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 device_usage_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file: {e}")
+            print(f"Error reading CSV file 'iot_device_usage.csv' with error {e}")
 
         device_usage_data = []
-
         for row in device_usage_rows:
-            try:
-                row["deviceUsageId"] = int(row["deviceUsageId"])
-                row["hour"] = int(row["hour"])
-                row["usage"] = int(row["usage"])
-                row["deviceId"] = int(row["deviceId"]) if row["deviceId"] else None
-                device_usage_data.append(
-                    {key: value for key, value in row.items() if value != ""}
-                )
+            row["deviceUsageId"] = int(row["deviceUsageId"])
+            row["hour"] = int(row["hour"])
+            row["usage"] = int(row["usage"])
+            row["deviceId"] = int(row["deviceId"]) if row["deviceId"] else None
+            device_usage_data.append(
+                {key: value for key, value in row.items() if value != ""}
+            )
 
-            except Exception as e:
-                print(f"Error processing IotDeviceUsage row {row}, Error: {e} ")
-
-        if device_usage_data:
-            try:
-                conn.execute(insert(IotDeviceUsage), device_usage_data)
-            except Exception as e:
-                print(f"Error inserting IotDeviceUsage data in the db: {e}")
+        conn.execute(insert(IotDeviceUsage), device_usage_data)
 
         # Data for Automations
         automation_rows = []
@@ -149,25 +123,18 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 automation_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file for Automations: {e}")
+            print(f"Error reading CSV file 'automations.csv' with error {e}")
 
         automation_data = []
         for row in automation_rows:
-            try:
-                row["automationId"] = int(row["automationId"])
-                row["deviceId"] = int(row["deviceId"])
-                row["newState"] = json.loads(row["newState"])
-                automation_data.append(
-                    {key: value for key, value in row.items() if value != ""}
-                )
-            except Exception as e:
-                print(f"Error processing Automation row: {row},  Errror: {e}")
+            row["automationId"] = int(row["automationId"])
+            row["deviceId"] = int(row["deviceId"])
+            row["newState"] = json.loads(row["newState"])
+            automation_data.append(
+                {key: value for key, value in row.items() if value != ""}
+            )
 
-        if automation_data:
-            try:
-                conn.execute(insert(Automations), automation_data)
-            except Exception as e:
-                print(f"Error inserting Automations data in the ds: {e}")
+        conn.execute(insert(Automations), automation_data)
 
         # Data for EnergySavingGoals
         energy_saving_goal_rows = []
@@ -176,25 +143,19 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 energy_saving_goal_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file for EnergySavingGoals : {e}")
+            print(f"Error reading CSV file 'energy_saving_goals.csv' with error {e}")
 
         energy_saving_goal_data = []
         for row in energy_saving_goal_rows:
-            try:
-                row["goalId"] = int(row["goalId"])
-                row["target"] = float(row["goalId"])
-                row["progress"] = float(row["progress"])
-                row["complete"] = bool(row["complete"])
-                energy_saving_goal_data.append(
-                    {key: value for key, value in row.items() if value != ""}
-                )
-            except Exception as e:
-                print(f"Error processing EnergySavingGoals row: {row}, Error: {e}")
-        if energy_saving_goal_data:
-            try:
-                conn.execute(insert(EnergySavingGoals), energy_saving_goal_data)
-            except Exception as e:
-                print(f"Error inserting EnergySavingGoals data in the db: {e}")
+            row["goalId"] = int(row["goalId"])
+            row["target"] = float(row["goalId"])
+            row["progress"] = float(row["progress"])
+            row["complete"] = bool(row["complete"])
+            energy_saving_goal_data.append(
+                {key: value for key, value in row.items() if value != ""}
+            )
+
+        conn.execute(insert(EnergySavingGoals), energy_saving_goal_data)
 
         # Data for EnergyRecotds
         energy_record_rows = []
@@ -203,25 +164,19 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 energy_record_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file for EnergyRecords : {e}")
+            print(f"Error reading CSV file 'energy_records.csv' with error {e}")
 
         energy_record_data = []
         for row in energy_record_rows:
-            try:
-                row["energyRecordId"] = int(row["energyRecordId"])
-                row["hour"] = int(row["hour"])
-                row["energyUse"] = float(row["energyUse"])
-                row["energyGeneration"] = float(row["energyGeneration"])
-                energy_record_data.append(
-                    {key: value for key, value in row.items() if value != ""}
-                )
-            except Exception as e:
-                print(f"Error processing EnergyRecords row: {row}, Error: {e}")
-        if energy_record_data:
-            try:
-                conn.execute(insert(EnergyRecords), energy_record_data)
-            except Exception as e:
-                print(f"Error inserting EnergyRecords data in the db: {e}")
+            row["energyRecordId"] = int(row["energyRecordId"])
+            row["hour"] = int(row["hour"])
+            row["energyUse"] = float(row["energyUse"])
+            row["energyGeneration"] = float(row["energyGeneration"])
+            energy_record_data.append(
+                {key: value for key, value in row.items() if value != ""}
+            )
+
+        conn.execute(insert(EnergyRecords), energy_record_data)
 
         # Data for Users
         user_rows = []
@@ -230,22 +185,14 @@ def add_data():
                 reader = csv.DictReader(csvfile)
                 user_rows.extend([row for row in reader])
         except Exception as e:
-            print(f"Error reading CSV file for Users: {e}")
+            print(f"Error reading CSV file 'users.csv' with error {e}")
 
         user_data = []
         for row in user_rows:
-            try:
-                row["userId"] = int(row["userId"])
-                user_data.append(
-                    {key: value for key, value in row.items() if value != ""}
-                )
-            except Exception as e:
-                print(f"Error processing Users row: {row}, Error: {e}")
-        if user_data:
-            try:
-                conn.execute(insert(Users), user_data)
-            except Exception as e:
-                print(f"Error inserting Users data in the db: {e}")
+            row["userId"] = int(row["userId"])
+            user_data.append({key: value for key, value in row.items() if value != ""})
+
+        conn.execute(insert(Users), user_data)
 
         conn.commit()
 
