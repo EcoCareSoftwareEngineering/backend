@@ -100,15 +100,12 @@ def post_automations_handler():
     with db.engine.connect() as conn:
         newId = conn.execute(statement).first()
 
-        if newId is not None:
-            newId = newId[0]
-
         conn.commit()
 
     if newId is None:
         return "", 500
 
-    statement = select(Automations).where(Automations.automationId == newId)
+    statement = select(Automations).where(Automations.automationId == newId[0])
     with db.engine.connect() as conn:
         result = conn.execute(statement).first()
 
