@@ -16,12 +16,15 @@ def automations_handler():
         return post_automations_handler()
     return jsonify({"Error": "Invalid"}), 500
 
-#http://127.0.0.1:5000/api/automations/
+
+# http://127.0.0.1:5000/api/automations/
 def get_automations_handler():
     if request.args.get("deviceId") is None:
         statement = select(Automations)
     else:
-        statement = select(Automations).where(Automations.deviceId == request.args.get("deviceId"))
+        statement = select(Automations).where(
+            Automations.deviceId == request.args.get("deviceId")
+        )
 
     with db.engine.connect() as conn:
         results = conn.execute(statement)
@@ -33,7 +36,7 @@ def get_automations_handler():
             dateTime,
             newState,
         ) = result
-    
+
         package = {
             "automationId": automationId,
             "deviceId": deviceId,
@@ -44,10 +47,15 @@ def get_automations_handler():
         response.append(package)
     return jsonify(response), 200
 
-#curl -X POST -H "Content-Type: application/json" -d '{"deviceId": 2, "dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/
+
+# curl -X POST -H "Content-Type: application/json" -d '{"deviceId": 2, "dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/
 def post_automations_handler():
-    jsonresult = request.get_json(silent=True)
-    '''
+    jsonresult = request.json
+
+    if jsonresult is None:
+        return "", 500
+
+    """
     if jsonresult == None: #since I set silent = True, this should return None if the data given isn't application/json and also if the get_json fails.
         return jsonify({"oh no": "whoops"}), 500 #to be made into jsonify(), 500 later
     else:
@@ -75,41 +83,53 @@ def post_automations_handler():
                                                             
                                                         },
                                                         "required": ["deviceId", "dateTime", "newState"] })
-        except: '''
-        
-    statement = insert(Automations).values(
-        deviceId=jsonresult["deviceId"],
-        dateTime=jsonresult["dateTime"],
-        newState=jsonresult["newState"] #assuming the newState passed in is a dictionary I should be able to do this?
-        ).returning(Automations.automationId)
-    
+        except: """
+
+    statement = (
+        insert(Automations)
+        .values(
+            deviceId=jsonresult["deviceId"],
+            dateTime=jsonresult["dateTime"],
+            newState=jsonresult[
+                "newState"
+            ],  # assuming the newState passed in is a dictionary I should be able to do this?
+        )
+        .returning(Automations.automationId)
+    )
+
     with db.engine.connect() as conn:
-        newId = conn.execute(statement)
-    conn.commit()
+        newId = conn.execute(statement).first()
+
+        if newId is not None:
+            newId = newId[0]
+
+        conn.commit()
+
+    if newId is None:
+        return "", 500
+
     statement = select(Automations).where(Automations.automationId == newId)
     with db.engine.connect() as conn:
-        results = conn.execute(statement)
-    response = []
-    print("+++++++++++++++++++", flush=True)
-    print(results.first(), flush=True)
-    for result in results:
-        (
-            automationId,
-            deviceId,
-            dateTime,
-            newState,
-        ) = result
+        result = conn.execute(statement).first()
 
-        package = {
-            "automationId": automationId,
-            "deviceId": deviceId,
-            "dateTime": dateTime,
-            "newState": newState,
-        }
+    if result is None:
+        return "", 500
 
-        response.append(package)
-    return jsonify(response), 200
-            
+    (
+        automationId,
+        deviceId,
+        dateTime,
+        newState,
+    ) = result
+
+    package = {
+        "automationId": automationId,
+        "deviceId": deviceId,
+        "dateTime": dateTime,
+        "newState": newState,
+    }
+
+    return jsonify(package), 200
 
 
 @automations_blueprint.route("/<int:automation_id>/", methods=["PUT", "DELETE"])
@@ -124,12 +144,13 @@ def automations_update_handler(automation_id: int):
 def put_automations_update_handler(automation_id: int):
     return jsonify({"endpoint": "PUT_automations_update_handler"}), 200
 
+
 # curl -X DELETE http://127.0.0.1:5000/api/automations/3/
 def delete_automations_update_handler(automation_id: int):
     statement = delete(Automations).where(Automations.automationId == automation_id)
     with db.engine.connect() as conn:
         results = conn.execute(statement)
-    if results.rowcount > 0: #if this has deleted anything return 200 
+    if results.rowcount > 0:  # if this has deleted anything return 200
         return jsonify(), 200
-    else: #if we failed to delete anything return 500
+    else:  # if we failed to delete anything return 500
         return jsonify(), 500
