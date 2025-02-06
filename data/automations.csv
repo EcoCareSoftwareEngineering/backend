@@ -1,0 +1,3 @@
+automationId,deviceId,dateTime,newState
+1,1,2025-02-02 08:00:00,"[{""fieldName"": ""hue"", ""datatype"": ""integer"", ""value"": ""10""}]"
+2,2,2025-02-02 09:00:00,"[{""fieldName"": ""channel"", ""datatype"": ""integer"", ""value"": ""5""}]"

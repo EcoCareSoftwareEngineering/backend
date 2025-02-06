@@ -41,6 +41,29 @@ To run pytest (make sure the app is running with no errors)
 To see any print statements make sure to use
 - `pytest -s`
 
+To write test cases use the `requests` module in python
+- `requests.get("http://127.0.0.1:5000/.../")`
+- `requests.post("http://127.0.0.1:5000/.../", headers={"headerName": "headerValue"}, data={...})`
+- `requests.put("http://127.0.0.1:5000/.../", headers={"headerName": "headerValue"}, data={...})`
+- `requests.delete("http://127.0.0.1:5000/.../", headers={"headerName": "headerValue"})`
+
+To get the JSON response
+- `requests.get(...).json()`
+
+To get the status code
+- `requests.get(...).status_code()`
+
+To compare against expected data
+- `assert response == expected_data`
+Syntax
+- `assert [True | False]` - All asserts must be true for the test to pass.
+
+The DB is reset before every test function is ran. 
+
+To make it easier to compare to expected data, the data from the CSV files are read and stored as dictionaries using a Pytest feature called fixtures, see [conftest.py](../tests/conftest.py). To access the data write the function name of the data you want as a parameter of the file, e.g. `def test_iot_devices_get(iot_devices_data):`. 
+
+It should be noted that this is the data straight from the CSV file which may be a different structure from the API endpoints. For example the iot_devices.csv contains the `pinCode` for each device or ,, if there is not one, however the API doesn't return `pinCode` but instead `pinEnabled` and `unlocked`. You may need to change the structure/values of the data to ensure the test is correct.
+
 ## Printing from Flask
 
 To use print statements in Flask make sure to use
