@@ -80,6 +80,7 @@ def post_automations_handler():
                                         ]
                                     },
                                 },
+                                "required": ["fieldName", "dataType", "value"],
                             },
                         },
                     },
@@ -142,8 +143,97 @@ def automations_update_handler(automation_id: int):
     return jsonify({"Error": "Invalid"}), 500
 
 
+# curl -X PUT -H "Content-Type: application/json" -d '{"dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/34/
 def put_automations_update_handler(automation_id: int):
-    return jsonify({"endpoint": "PUT_automations_update_handler"}), 200
+    jsonresult = request.json
+    jlength = len(jsonresult)
+    if jlength < 3 and jlength > 0:  # then we have to change one thing
+        try:
+            validate(
+                jsonresult,
+                {
+                    "id": "auto",
+                    "title": "Automation",
+                    "description": "an automated action",
+                    "type": "object",
+                    "properties": {
+                        "dateTime": {"type": "string"},
+                        "newState": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "fieldName": {"type": "string"},
+                                    "dataType": {"type": "string"},
+                                    "value": {
+                                        "oneOf": [
+                                            {"type": "string"},
+                                            {"type": "number"},
+                                            {"type": "boolean"},
+                                        ]
+                                    },
+                                },
+                                "required": ["fieldName", "dataType", "value"],
+                            },
+                        },
+                    },
+                },
+            )
+        except:
+            return "", 500
+        # if successful, let's UPDATE the entry and set up our select statement
+        if jlength == 1:
+            if "dateTime" in jsonresult:
+                statement = (
+                    update(Automations)
+                    .where(Automations.automationId == automation_id)
+                    .values(dateTime=jsonresult["dateTime"])
+                )
+            elif "newState" in jsonresult:
+                statement = (
+                    update(Automations)
+                    .where(Automations.automationId == automation_id)
+                    .values(newState=jsonresult["newState"])
+                )
+        elif jlength == 2:
+            statement = (
+                update(Automations)
+                .where(Automations.automationId == automation_id)
+                .values(
+                    dateTime=jsonresult["dateTime"], newState=jsonresult["newState"]
+                )
+            )
+
+        with db.engine.connect() as conn:
+            conn.execute(statement)
+            conn.commit()
+            # statement = update(Automations).where(Automations.automationId == jsonresult["automationId"])
+
+    elif jlength > 3:
+        return (
+            "",
+            500,
+        )  # then we have x < 0 or x > 2 data (where x is len(data)) in the request and it's invalid
+    statement = select(Automations).where(Automations.automationId == automation_id)
+    with db.engine.connect() as conn:
+        result = conn.execute(statement).first()
+    if result is None:
+        return "", 500
+    (
+        automationId,
+        deviceId,
+        dateTime,
+        newState,
+    ) = result
+
+    package = {
+        "automationId": automationId,
+        "deviceId": deviceId,
+        "dateTime": dateTime,
+        "newState": newState,
+    }
+
+    return jsonify(package), 200
 
 
 # curl -X DELETE http://127.0.0.1:5000/api/automations/28/
