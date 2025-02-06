@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select, insert, update, delete
-from jsonschema import validators
+from jsonschema import *
 
 from ...models import *
 from ... import db
@@ -54,36 +54,42 @@ def post_automations_handler():
 
     if jsonresult is None:
         return "", 500
-
-    """
-    if jsonresult == None: #since I set silent = True, this should return None if the data given isn't application/json and also if the get_json fails.
-        return jsonify({"oh no": "whoops"}), 500 #to be made into jsonify(), 500 later
     else:
         try:
-            jsonschema.validators.validate(jsonresult, {"id": "auto", 
-                                                        "title": "Automation", 
-                                                        "description": "an automated action", 
-                                                        "type": "object",
-                                                        "properties": {"deviceId":{"type": "integer"},
-                                                            "dateTime": {"type": "string"},
-                                                            "newState": {"type": "array", 
-                                                                         "items": { 
-                                                                             "type": object,
-                                                                             "properties": {
-                                                                                 "fieldName": {"type": "string"},
-                                                                                 "dataType": {"oneOf":[ #this should make it so datatype is one of these
-                                                                                     {"type": "integer"},
-                                                                                     {"type": "string"},
-                                                                                     {"type": "number"},
-                                                                                     {"type": "boolean"},
-                                                                                 ]},
-                                                                                 "value": }
-                                                                             }
-                                                                        }
-                                                            
-                                                        },
-                                                        "required": ["deviceId", "dateTime", "newState"] })
-        except: """
+            Validator.validate(
+                jsonresult,
+                {
+                    "id": "auto",
+                    "title": "Automation",
+                    "description": "an automated action",
+                    "type": "object",
+                    "properties": {
+                        "deviceId": {"type": "integer"},
+                        "dateTime": {"type": "string"},
+                        "newState": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "fieldName": {"type": "string"},
+                                    "dataType": {"type": "string"},
+                                    "value": {
+                                        "oneOf": [
+                                            {"type": "string"},
+                                            {"type": "number"},
+                                            {"type": "boolean"},
+                                        ]
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    "required": ["deviceId", "dateTime", "newState"],
+                },
+                cls=None,
+            )
+        except:
+            return "", 500  # return error if we can't validate the json given
 
     statement = (
         insert(Automations)
@@ -92,7 +98,7 @@ def post_automations_handler():
             dateTime=jsonresult["dateTime"],
             newState=jsonresult[
                 "newState"
-            ],  # assuming the newState passed in is a dictionary I should be able to do this?
+            ],  # assuming the newState passed in is a dictionary
         )
         .returning(Automations.automationId)
     )
@@ -142,12 +148,13 @@ def put_automations_update_handler(automation_id: int):
     return jsonify({"endpoint": "PUT_automations_update_handler"}), 200
 
 
-# curl -X DELETE http://127.0.0.1:5000/api/automations/3/
+# curl -X DELETE http://127.0.0.1:5000/api/automations/28/
 def delete_automations_update_handler(automation_id: int):
     statement = delete(Automations).where(Automations.automationId == automation_id)
     with db.engine.connect() as conn:
         results = conn.execute(statement)
+        conn.commit()
     if results.rowcount > 0:  # if this has deleted anything return 200
-        return jsonify(), 200
+        return "", 200
     else:  # if we failed to delete anything return 500
-        return jsonify(), 500
+        return "", 500
