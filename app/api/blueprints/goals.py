@@ -8,10 +8,12 @@ goals_blueprint = Blueprint("goals", __name__, url_prefix="/goals")
 
 # GET - get all goals
 
-@goals_blueprint.route("/", methods=["GET"])
+@goals_blueprint.route("/", methods=["GET","POST"])
 def goals_handler():
     if request.method == "GET":
         return get_goals_handler()
+    elif request.method == "POST":
+        return post_goal_handler()
     return jsonify({"endpoint": "GET_goals_handler"}), 500
 
 def get_goals_handler():
@@ -64,29 +66,41 @@ def post_goal_handler():
     if not data or "name" not in data or "target" not in data or "date" not in data :
         return jsonify({"Error": "Missing required fields: name, target or date"}), 400
 
-    # Create and save new tag
     new_goal = EnergySavingGoals(name=data["name"],target=data["target"],date=data["date"] )
 
     try:
-        db.session.add(new_goal)
-        db.session.commit()
-        return (
-            jsonify(
-                {
-                    "message": "Goal created successfully",
-                    "tagId": new_goal.goalId,
-                    "name": new_goal.name,
-                    "target": new_goal.target,
-                    "progress": new_goal.progress,
-                    "complete": new_goal.complete,
-                    "date": new_goal.date,
-                }
-            ),
-            201,
-        )
+        with db.engine.connect() as conn:
+             result = conn.execute(
+                 insert(EnergySavingGoals).values(new_goal))
+             conn.commit()
+
+    #     db.session.add(new_goal)
+    #     db.session.commit()
+    #     return (
+    #         jsonify(
+    #             {
+    #                 "message": "Goal created successfully",
+    #                 "tagId": new_goal.goalId,
+    #                 "name": new_goal.name,
+    #                 "target": new_goal.target,
+    #                 "progress": new_goal.progress,
+    #                 "complete": new_goal.complete,
+    #                 "date": new_goal.date,
+    #             }
+    #         ),
+    #         201,
+    #     )
     except Exception as e:
         db.session.rollback()  
         return (
             jsonify({"Error": f"Couldn't create goal: {str(e)}"}),
-            500,
+            500,  
         )
+ 
+    @goals_blueprint.route("/<int:goalId>/", methods=["PUT", "DELETE"])
+    def automations_update_handler(goal_id: int):
+        if request.method == "PUT":
+            return put_goal_update_handler(goalId)
+        elif request.method == "DELETE":
+            return delete_goal_update_handler(goalId)
+        return jsonify({"Error": "Invalid"}), 500
