@@ -6,6 +6,7 @@ from ... import db
 
 goals_blueprint = Blueprint("goals", __name__, url_prefix="/goals")
 
+# GET - get all goals
 
 @goals_blueprint.route("/", methods=["GET"])
 def goals_handler():
@@ -53,3 +54,39 @@ def get_goals_handler():
         data_to_send.append(entry)
 
     return jsonify(data_to_send), 200
+
+    # POST - create a new goal
+
+def post_goal_handler():
+    data = request.get_json()
+
+    # Validate
+    if not data or "name" not in data or "target" not in data or "date" not in data :
+        return jsonify({"Error": "Missing required fields: name, target or date"}), 400
+
+    # Create and save new tag
+    new_goal = EnergySavingGoals(name=data["name"],target=data["target"],date=data["date"] )
+
+    try:
+        db.session.add(new_goal)
+        db.session.commit()
+        return (
+            jsonify(
+                {
+                    "message": "Goal created successfully",
+                    "tagId": new_goal.goalId,
+                    "name": new_goal.name,
+                    "target": new_goal.target,
+                    "progress": new_goal.progress,
+                    "complete": new_goal.complete,
+                    "date": new_goal.date,
+                }
+            ),
+            201,
+        )
+    except Exception as e:
+        db.session.rollback()  
+        return (
+            jsonify({"Error": f"Couldn't create goal: {str(e)}"}),
+            500,
+        )
