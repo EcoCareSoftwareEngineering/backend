@@ -51,12 +51,11 @@ def get_automations_handler():
 # curl -X POST -H "Content-Type: application/json" -d '{"deviceId": 2, "dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/
 def post_automations_handler():
     jsonresult = request.json
-
     if jsonresult is None:
         return "", 500
     else:
         try:
-            Validator.validate(
+            validate(
                 jsonresult,
                 {
                     "id": "auto",
@@ -86,7 +85,6 @@ def post_automations_handler():
                     },
                     "required": ["deviceId", "dateTime", "newState"],
                 },
-                cls=None,
             )
         except:
             return "", 500  # return error if we can't validate the json given
