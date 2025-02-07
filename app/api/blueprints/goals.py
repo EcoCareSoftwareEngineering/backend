@@ -74,22 +74,7 @@ def post_goal_handler():
                  insert(EnergySavingGoals).values(new_goal))
              conn.commit()
 
-    #     db.session.add(new_goal)
-    #     db.session.commit()
-    #     return (
-    #         jsonify(
-    #             {
-    #                 "message": "Goal created successfully",
-    #                 "tagId": new_goal.goalId,
-    #                 "name": new_goal.name,
-    #                 "target": new_goal.target,
-    #                 "progress": new_goal.progress,
-    #                 "complete": new_goal.complete,
-    #                 "date": new_goal.date,
-    #             }
-    #         ),
-    #         201,
-    #     )
+    
     except Exception as e:
         db.session.rollback()  
         return (
