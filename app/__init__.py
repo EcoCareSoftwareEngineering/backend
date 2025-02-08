@@ -1,4 +1,5 @@
 import os, json
+from flask_socketio import SocketIO
 from flask import Flask
 from flask_migrate import Migrate, init, migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
@@ -20,6 +21,7 @@ def create_app():
     from . import models
     from .data import add_data_check
     from .routes import register_routes
+    from .websockets.events import register_socketio_handlers
 
     app = Flask(__name__)
 
@@ -28,6 +30,7 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
     CORS(app)
+    socketio = SocketIO(app)
 
     with app.app_context():
         if not os.path.exists(os.path.join(os.getcwd(), "migrations")):
@@ -45,5 +48,6 @@ def create_app():
         add_data_check()
 
     register_routes(app)
+    register_socketio_handlers(socketio)
 
-    return app
+    return app, socketio
