@@ -232,7 +232,7 @@ POST /api/devices/
 
 ### Update an IoT Device's Details/State 
 
-Updates the IoT Device's details/state that correspond to `deviceID`, only send the new details.
+Updates the IoT Device's details/state that correspond to `deviceID`, only send the new details, however all tagIds must be send as the absence of a tagId is understood as removing the tag from the IoT Device.
 
 #### Request 
 
