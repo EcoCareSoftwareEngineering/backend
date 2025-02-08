@@ -81,9 +81,21 @@ def post_tags_handler():
             500,
         )
 
-
-# DELETE - delete tag
-@tags_blueprint.route("/<int:tag_id>", methods=["DELETE"])
+# route supports GET & DELETE for tag_id
+@tags_blueprint.route("/<int:tag_id>", methods=["GET", "DELETE"])
+def tag_handle(tag_id):
+    if request.method == "GET":
+        return get_single_tag(tag_id)
+    elif request.method == "DELETE":
+        return delete_tag_handler(tag_id)
+# GET single tag
+def get_single_tag(tag_id):
+    tag = db.session.get(Tags, tag_id)
+    if not tag:
+        return jsonify({f"Error": f"Tag with id {tag_id} not found"}), 404
+    return jsonify({"tagId": tag.tagId, "name": tag.name, "tagType": tag.tagType.name}), 200
+    
+# DELETE - delete tag    
 def delete_tag_handler(tag_id):
     tag = db.session.get(Tags, tag_id)
     if not tag:
