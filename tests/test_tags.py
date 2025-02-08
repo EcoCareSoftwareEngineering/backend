@@ -1,21 +1,37 @@
+import pytest
 import requests
 
 # Base URL for tags
 BASE_URL = "http://127.0.0.1:5000/api/tags/"
 
+@pytest.fixture
+def setup_tags():
+    # Fixture providing expected tags data
+    response = requests.get(BASE_URL)
+    assert response.status_code == 200
+    return response.json()     
+
+@pytest.fixture
+def create_tag():
+    # Fixture to create a tag for testing
+    new_tag = {"name": "TestTag", "tagType": "Room"}
+    response = requests.post(BASE_URL, json=new_tag)
+    assert response.status_code == 201
+    return response.json()
+    
 
 # Test GET request to retrieve all tags
-def test_get_tags():
-    response = requests.get(f"{BASE_URL}")
+def test_get_tags(setup_tags):
+    response = requests.get(BASE_URL)
     # Verify status
     assert response.status_code == 200
-    assert isinstance(response.json(), list)
+    assert response.json() == setup_tags
 
 # Test POST request 
-def test_post_tags():
+def test_post_tags(setup_tags):
     # Create a new tag
     new_tag ={
-        "name": "TestTag",
+        "name": "NewTestTag",
         "tagType": "Room"
     }
     
@@ -23,21 +39,18 @@ def test_post_tags():
     assert response.status_code == 201
     
     # Check if the tag was created
-    data = response.json()
-    assert "tagId" in data
-    assert data["name"] == new_tag["name"]
-    assert data["tagType"] == new_tag["tagType"]
+    created_tag = response.json()
+    assert "tagId" in created_tag
     
-    return data["tagId"]
-
+    # Update expected data
+    updated_tags = setup_tags +[{"tagId": created_tag["tagId"], **new_tag}]
+    assert requests.get(BASE_URL).json() == updated_tags
+   
 # Test DELETE request
-def test_delete_tags():
+def test_delete_tags(create_tag):
     # Create a tag 
-    tag_id = test_post_tags();
-    assert tag_id is not None, "test_post_tags() returned None"
-    
-    print(f"Deleting tag with ID: {tag_id}")
-     
+    tag_id = create_tag["tagId"]
+   
     response = requests.delete(f"{BASE_URL}{tag_id}")
     assert response.status_code == 200 # Deleted successfully
     
@@ -46,18 +59,16 @@ def test_delete_tags():
     assert response.status_code == 404 # Should not be found
     
 # Test for single tagId 
-def test_get_single_tag():
-    tag_id = test_post_tags()
-    assert tag_id is not None, "test_post_tags() returned None"
-    
+def test_get_single_tag(create_tag):
+    tag_id = create_tag["tagId"]
+        
     response = requests.get(f"{BASE_URL}{tag_id}")
     assert response.status_code == 200
     
     data = response.json()
-    assert data["tagId"] == tag_id
-    assert data["name"] == "TestTag"
-    assert data["tagType"] == "Room"
+    assert data ==  {"tagId": tag_id, "name": "TestTag", "tagType": "Room"}
     
+# Test GET if tagId doesn't exist
 def test_get_single_tag_not_found():
     response = requests.get(f"{BASE_URL}9999999") 
     assert response.status_code == 404
