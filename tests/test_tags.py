@@ -45,5 +45,19 @@ def test_delete_tags():
     response = requests.get(f"{BASE_URL}{tag_id}")
     assert response.status_code == 404 # Should not be found
     
+# Test for single tagId 
+def test_get_single_tag():
+    tag_id = test_post_tags()
+    assert tag_id is not None, "test_post_tags() returned None"
     
+    response = requests.get(f"{BASE_URL}{tag_id}")
+    assert response.status_code == 200
     
+    data = response.json()
+    assert data["tagId"] == tag_id
+    assert data["name"] == "TestTag"
+    assert data["tagType"] == "Room"
+    
+def test_get_single_tag_not_found():
+    response = requests.get(f"{BASE_URL}9999999") 
+    assert response.status_code == 404
