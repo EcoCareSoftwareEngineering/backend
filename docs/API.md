@@ -14,6 +14,16 @@ The touchscreen frontend should use the following login credentials and make an 
 - Username: "touchscreen"
 - Password: "touchscreenPassword"
 
+## General Information
+
+### Dates
+
+All dates used by the API are in the format: "yyyy-mm-dd", where "yyyy" is the 4 digit year, "mm" is the 2 digit month and "dd" is the 2 digit day.
+
+If a time is required it is in the format: "hh:mm", where "hh" is the 2 digit hour in a 24 clock and "mm" is the 2 digit minutes.
+
+If a dateTime is requred it is in the format: "yyyy-mm-dd hh:mm", see above for information.
+
 Overview:
 - General
   - [`GET /unlock/`](#check-if-the-smart-home-has-a-pin-enabled) - Check if the local device has a PIN enabled
@@ -350,20 +360,19 @@ Status 500 for incorrect pin code
 
 #### Request 
 
-| Parameter  | Type    | Required | Description                                                                                                                         |
-| ---------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| deviceId   | Integer | Yes      | Fetch only usage of device with device ID                                                                                           |
-| timePeriod | String  | Yes      | ("Day", "Week", "Month", "Year"), fetches the usage from the search range grouped Day: Hours, Week: Days, Month: Days, Year: Months |
-| rangeStart | Date    | Yes      | Start date of search range                                                                                                          |
-| rangeEnd   | Date    | Yes      | End date of search range                                                                                                            |
+| Parameter  | Type    | Required | Description                               |
+| ---------- | ------- | -------- | ----------------------------------------- |
+| deviceId   | Integer | No       | Fetch only usage of device with device ID |
+| rangeStart | Date    | Yes      | Start date of search range                |
+| rangeEnd   | Date    | Yes      | End date of search range                  |
 
 ```
-GET /api/devices/usage/?deviceId=0&timePeriod=Day
+GET /api/devices/usage/?rangeStart=...&rangeEnd=...
 ```
 
 #### Response
 
-Response is minutes device(s) were active according to timePeriod groupings, i.e if timePeriod was Day then there will be 24 values.
+Each element is the number of minutes the device was active in the period of an hour. Each day has 24 entries corresponding to the 24 hour periods in a day. The array starts from the first day in the range, then second, etc.
 
 ```
 [
@@ -647,17 +656,18 @@ Status 500 for failure
 
 #### Request 
 
-| Parameter  | Type   | Required | Description                                                                                                                   |
-| ---------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| timePeriod | String | Yes      | ("Day", "Week", "Month", "Year") fetches data from the search range grouped Day: Hours, Week: Days, Month: Days, Year: Months |
-| startDate  | String | Yes      | Start date of search range                                                                                                    |
-| endDate    | String | Yes      | End date of search range                                                                                                      |
+| Parameter | Type   | Required | Description                |
+| --------- | ------ | -------- | -------------------------- |
+| startDate | String | Yes      | Start date of search range |
+| endDate   | String | Yes      | End date of search range   |
 
 ```
-GET /api/?timePeriod=Day
+GET /api/?startDate=...&endDate=...
 ```
 
 #### Response
+
+Each element is the amount of energy used/generated in the period of an hour. Each day has 24 entries corresponding to the 24 hour periods in a day. The array starts from the first day in the range, then second, etc.
 
 ```
 {
