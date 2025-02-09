@@ -3,12 +3,6 @@ import requests
 
 BASE_URL = "http://127.0.0.1:5000/api/tags/"
 
-@pytest.fixture(autouse=True, scope="function")
-def config():
-    response = requests.post("http://127.0.0.1:5000/dev/resetdb/").json()
-    assert response == ""
-    yield
-
 @pytest.fixture(scope="function")
 def create_tag():
     new_tag = {"name": "TestTag", "tagType": "Room"}
