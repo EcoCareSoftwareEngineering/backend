@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select, insert, update, delete
+from jsonschema import *
 
 from ...models import *
 from ... import db
@@ -63,24 +64,69 @@ def post_goal_handler():
     data = request.get_json()
 
     # Validate
-    if not data or "name" not in data or "target" not in data or "date" not in data :
-        return jsonify({"Error": "Missing required fields: name, target or date"}), 400
+    jsonresult = request.json
+    if jsonresult is None:
+        return "", 500
+    else:
+        try:
+            validate(
+                jsonresult,
+                {
+                    "id": "auto",
+                    "title": "Energy Goal",
+                    "description": "an energy saving goal",
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "target": {"type": "integer"},
+                        "date":{"type":"string"},
+                    },
+                    "required": ["target"],
+                },
+            )
+        except:
+            return "", 500  # return error if validation can't be confirmed
 
-    new_goal = EnergySavingGoals(name=data["name"],target=data["target"],date=data["date"] )
-
-    try:
-        with db.engine.connect() as conn:
-             result = conn.execute(
-                 insert(EnergySavingGoals).values(new_goal))
-             conn.commit()
-
-    
-    except Exception as e:
-        db.session.rollback()  
-        return (
-            jsonify({"Error": f"Couldn't create goal: {str(e)}"}),
-            500,  
+    new_goal = (
+        insert(EnergySavingGoals)
+        .values(name = jsonresult["name"],
+                target=jsonresult["target"],
+                date=jsonresult["date"],
         )
+        .returning(EnergySavingGoals.goalID)
+    )
+    
+    with db.engine.connect() as conn:
+            newId = conn.execute(new_goal).first()
+            conn.commit()
+
+    if newId is None:
+        return "", 500
+    
+    result = select(EnergySavingGoals).where(EnergySavingGoals.goalId == newId[0])
+    
+    if result is None:
+        return "", 500
+    
+    (
+        goalId,
+        name,
+        target,
+        progress,
+        complete,
+        date,
+    ) = result
+
+    entry = {
+            "goalId": goalId,
+            "name": name,
+            "target": target,
+            "progress": progress,
+            "complete": complete,
+            "date": date,
+        }
+
+    return jsonify(entry), 200
  
     @goals_blueprint.route("/<int:goalId>/", methods=["PUT", "DELETE"])
     def automations_update_handler(goal_id: int):
