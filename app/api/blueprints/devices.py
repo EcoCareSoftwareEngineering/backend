@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, request
+from flask_socketio import emit
 from sqlalchemy import select, insert, update, delete
 
 from ...models import *
-from ... import db
+from ... import db, socketio
 from ...routes import check_token
 
 devices_blueprint = Blueprint("devices", __name__, url_prefix="/devices")
@@ -62,6 +63,8 @@ def get_devices_handler():
             "ipAddress": ipAddress,
         }
         data_to_send.append(entry)
+
+    # socketio.emit("server_iot_device_update", {"Test": "value"})
 
     return jsonify(data_to_send), 200
 

@@ -1,23 +1,66 @@
 from flask_socketio import SocketIO, emit
+from sqlalchemy import select, update
+
+from ..models import IotDeviceFaultStatus, IotDeviceStatus, IotDevices
+
+from .. import db, unconnected_iot_devices
 
 
 def register_socketio_handlers(socketio: SocketIO):
     @socketio.on("connect")
     def connect_handler():
-        print("A client connected!", flush=True)
+        with db.engine.connect() as conn:
+            statement = select(IotDevices)
+            devices = conn.execute(statement)
 
-        # Send currently connected devices
+        connected_iot_devices = []
+        for device in devices:
+            (
+                _,
+                name,
+                description,
+                state,
+                status,
+                faultStatus,
+                _,
+                _,
+                _,
+                ipAddress,
+            ) = device
 
-    @socketio.on("receive_unconnected_iot_devices")
-    def receive_unconnected_iot_devices_hander():
+            connected_iot_devices.append(
+                {
+                    "ipAddress": ipAddress,
+                    "name": name,
+                    "description": description,
+                    "state": state,
+                    "status": "On" if status == IotDeviceStatus.On else "Off",
+                    "faultStatus": (
+                        "Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault"
+                    ),
+                }
+            )
 
-        # Update unconnected IoT Devices array
+        emit("connected_iot_devices", connected_iot_devices)
 
-        pass
+    @socketio.on("unconnected_iot_devices")
+    def receive_unconnected_iot_devices_hander(devices):
+        unconnected_iot_devices.clear()
+        unconnected_iot_devices.extend(devices)
 
-    @socketio.on("receive_iot_device_update")
-    def receive_iot_device_update():
+    @socketio.on("spoof_app_iot_device_update")
+    def receive_iot_device_update(device):
+        device["status"] = IotDeviceStatus[device["status"]]
+        device["faultStatus"] = IotDeviceFaultStatus[device["faultStatus"]]
+        statement = (
+            update(IotDevices)
+            .values(
+                state=device["state"],
+                status=device["status"],
+                fault_status=device["faultStatus"],
+            )
+            .where(IotDevices.ipAddress == device["ipAddress"])
+        )
 
-        # Update DB with new state
-
-        pass
+        with db.engine.connect() as conn:
+            conn.execute(statement)

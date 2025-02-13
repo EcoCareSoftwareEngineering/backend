@@ -12,9 +12,30 @@ from .config import Config
 
 db = SQLAlchemy()
 
-
 with open("config/smart_home_config.json") as file:
     local_device_config = json.load(file)
+
+unconnected_iot_devices = []
+
+""" Uncomment this definition if not using spoof app so can still have unconnected IoT devices """
+# unconnected_iot_devices = [
+#     {
+#         "ipAddress": "192.168.0.9",
+#         "name": "Smart Light",
+#         "description": "A smart lightbulb",
+#         "state": [],
+#         "status": "On",
+#         "faultStatus": "Ok",
+#     },
+#     {
+#         "ipAddress": "192.168.0.10",
+#         "name": "Smart Lock",
+#         "description": "A smart lock",
+#         "state": [{"fieldName": "engaged", "datatype": "boolean", "value": True}],
+#         "status": "On",
+#         "faultStatus": "Ok",
+#     },
+# ]
 
 
 def create_app():
@@ -30,6 +51,7 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
     CORS(app)
+    global socketio
     socketio = SocketIO(app)
 
     with app.app_context():
