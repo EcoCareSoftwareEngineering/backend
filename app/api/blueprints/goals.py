@@ -129,9 +129,16 @@ def post_goal_handler():
     return jsonify(entry), 200
  
     @goals_blueprint.route("/<int:goalId>/", methods=["PUT", "DELETE"])
-    def automations_update_handler(goal_id: int):
+    def goals_update_handler(goal_id: int):
         if request.method == "PUT":
-            return put_goal_update_handler(goalId)
+            return put_goal_update_handler(goal_id)
         elif request.method == "DELETE":
-            return delete_goal_update_handler(goalId)
+            return delete_goal_handler(goal_id)
         return jsonify({"Error": "Invalid"}), 500
+    
+    def delete_goal_handler(goal_id: int):
+        statement = delete(EnergySavingGoals).where(EnergySavingGoals.goalId == goal_id)
+        with db.engine.connect() as conn:
+            results = conn.execute(statement)
+            conn.commit()
+        
