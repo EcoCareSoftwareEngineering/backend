@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy import and_
 import datetime
 from ...models import *
 from ... import db
@@ -38,7 +39,7 @@ def get_energy_usage():
     # Query the database and order results by date then hour
     statement = (
         select(EnergyRecords)
-        .where((EnergyRecords.date >= start_date) & (EnergyRecords.date <= end_date))
+        .where(and_(EnergyRecords.date >= start_date, EnergyRecords.date <= end_date))
         .order_by(EnergyRecords.date, EnergyRecords.hour)
     )
 
@@ -48,10 +49,14 @@ def get_energy_usage():
     if not results:
         return jsonify({"Error": "No records found for the given date range"}), 404
 
-    response = [
-        {"energyUsage": record.energyUse, "energyGeneration": record.energyGeneration}
-        for record in results
-    ]
+    energy_usage = [record.energyUse for record in results]
+    energy_generation = [record.energyUse for record in results]
+    
+
+    response = {
+        "energyUsage": energy_usage,
+        "energyGeneration": energy_generation,
+    }
 
     return jsonify(response), 200
 
