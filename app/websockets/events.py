@@ -57,10 +57,44 @@ def register_socketio_handlers(socketio: SocketIO):
             .values(
                 state=device["state"],
                 status=device["status"],
-                fault_status=device["faultStatus"],
+                faultStatus=device["faultStatus"],
             )
             .where(IotDevices.ipAddress == device["ipAddress"])
         )
 
         with db.engine.connect() as conn:
             conn.execute(statement)
+            conn.commit()
+
+
+def send_iot_device_update(device_id):
+    statement = select(IotDevices).where(IotDevices.deviceId == device_id)
+    with db.engine.connect() as conn:
+        device = conn.execute(statement).first()
+
+    if device is None:
+        return
+
+    (
+        _,
+        name,
+        description,
+        state,
+        status,
+        faultStatus,
+        _,
+        _,
+        _,
+        ipAddress,
+    ) = device
+
+    device_update = {
+        "ipAddress": ipAddress,
+        "name": name,
+        "description": description,
+        "state": state,
+        "status": "On" if status == IotDeviceStatus.On else "Off",
+        "faultStatus": ("Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault"),
+    }
+
+    emit("server_iot_device_update", device_update)
