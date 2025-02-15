@@ -4,9 +4,25 @@ The base URL of all endpoints is: `127.0.0.0:5000/api`.
 
 All endpoints return `Status Code 200` for success and `Status Code 500` for errors. 
 
-For more information on data stored in the database see [models.py](../app/models.py)
+For more information on data stored in the database see [models.py](../app/models.py).
 
-Future addition that might not be added but be aware: Login endpoint will return an authorisation token which must be sent in the header under "token" to all endpoints. The touchscreen should make an implicit login call with the credentials Username: "touchscreen", Password: "password" to get its token.
+## Authentication
+
+To use the API all requests must be accompanied with an Authentication token in request headers. The token is aquired by sending a request to `.../accoutns/login/` with valid login credentials. The API will respond with a token to be used in future requests. `.../accounts/.../` are only endpoints that do not require a token for obvious reasons.
+
+The touchscreen frontend should use the following login credentials and make an automatic call upon startup:
+- Username: "touchscreen"
+- Password: "touchscreenPassword"
+
+## General Information
+
+### Dates
+
+All dates used by the API are in the format: "yyyy-mm-dd", where "yyyy" is the 4 digit year, "mm" is the 2 digit month and "dd" is the 2 digit day.
+
+If a time is required it is in the format: "hh:mm", where "hh" is the 2 digit hour in a 24 clock and "mm" is the 2 digit minutes.
+
+If a dateTime is requred it is in the format: "yyyy-mm-dd hh:mm", see above for information.
 
 Overview:
 - General
@@ -41,6 +57,8 @@ Overview:
   - [`DELETE /tags/`](#delete-a-tag) - Delete a tag
 
 ## General
+
+Still being planned, API may change. 
 
 ### Check if the Smart Home has a PIN enabled
 
@@ -127,8 +145,22 @@ GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&c
         "uptimeTimeStamp: "...",
         "ipAddress": "...",
         "roomTag": "Kitchen",
-        "userTags": ["Person1", "Person2", ...],
-        "customTags": ["Tag1", "Tag2", ...]
+        "userTags": [
+            {
+                "tagId": 0,
+                "name": "...",
+                "type": "..."
+            },
+            ...
+        ],
+        "customTags": [
+            {
+                "tagId": 0,
+                "name": "...",
+                "type": "..."
+            },
+            ...
+        ]
     }
 ]
 ```
@@ -189,14 +221,28 @@ POST /api/devices/
     "uptimeTimeStamp: "...",
     "ipAddress": "...",
     "roomTag": "Kitchen",
-    "userTags": ["Person1", "Person2"],
-    "customTags": ["Tag1", "Tag2"]
+    "userTags": [
+        {
+            "tagId": 0,
+            "name": "...",
+            "type": "..."
+        },
+        ...
+    ],
+    "customTags": [
+        {
+            "tagId": 0,
+            "name": "...",
+            "type": "..."
+        },
+        ...
+    ]
 }
 ```
 
 ### Update an IoT Device's Details/State 
 
-Updates the IoT Device's details/state that correspond to `deviceID`
+Updates the IoT Device's details/state that correspond to `deviceID`, only send the new details, however all tagIds must be send as the absence of a tagId is understood as removing the tag from the IoT Device.
 
 #### Request 
 
@@ -213,7 +259,6 @@ Updates the IoT Device's details/state that correspond to `deviceID`
 ```
 PUT /api/devices/<deviceId>/
 {
-    "deviceId": 0
     "name": "SmartLight",
     "description": "",
     "state": [
@@ -224,8 +269,8 @@ PUT /api/devices/<deviceId>/
         }
     ],
     "roomTag": "Kitchen",
-    "userTags": ["Person1", "Person2"],
-    "customTags": ["Tag1", "Tag2"]
+    "userTags": [0, 1, ...],
+    "customTags": [2, 3, ...]
 }
 ```
 
@@ -250,8 +295,22 @@ PUT /api/devices/<deviceId>/
     "uptimeTimeStamp: "...",
     "ipAddress": "...",
     "roomTag": "Kitchen",
-    "userTags": ["Person1", "Person2"],
-    "customTags": ["Tag1", "Tag2"]
+    "userTags": [
+        {
+            "tagId": 0,
+            "name": "...",
+            "type": "..."
+        },
+        ...
+    ],
+    "customTags": [
+        {
+            "tagId": 0,
+            "name": "...",
+            "type": "..."
+        },
+        ...
+    ]
 }
 ```
 
@@ -278,9 +337,10 @@ If an IoT deivce has a pin code setup, `pinEnabled` will be true, use this endpo
 
 #### Request 
 
-| Parameter | Type   | Required | Description         |
-| --------- | ------ | -------- | ------------------- |
-| pin       | String | Yes      | PIN entered by user |
+| Parameter | Type    | Required | Description                 |
+| --------- | ------- | -------- | --------------------------- |
+| deviceId  | Integer | Yes      | Id of device to be unlocked |
+| pin       | String  | Yes      | PIN entered by user         |
 
 ```
 POST /api/devices/unlock/<deviceId>/
@@ -300,20 +360,19 @@ Status 500 for incorrect pin code
 
 #### Request 
 
-| Parameter  | Type    | Required | Description                                                                                                                         |
-| ---------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| deviceId   | Integer | Yes      | Fetch only usage of device with device ID                                                                                           |
-| timePeriod | String  | Yes      | ("Day", "Week", "Month", "Year"), fetches the usage from the search range grouped Day: Hours, Week: Days, Month: Days, Year: Months |
-| rangeStart | Date    | Yes      | Start date of search range                                                                                                          |
-| rangeEnd   | Date    | Yes      | End date of search range                                                                                                            |
+| Parameter  | Type    | Required | Description                               |
+| ---------- | ------- | -------- | ----------------------------------------- |
+| deviceId   | Integer | No       | Fetch only usage of device with device ID |
+| rangeStart | Date    | Yes      | Start date of search range                |
+| rangeEnd   | Date    | Yes      | End date of search range                  |
 
 ```
-GET /api/devices/usage/?deviceId=0&timePeriod=Day
+GET /api/devices/usage/?rangeStart=...&rangeEnd=...
 ```
 
 #### Response
 
-Response is minutes device(s) were active according to timePeriod groupings, i.e if timePeriod was Day then there will be 24 values.
+Each element is the number of minutes the device was active in the period of an hour. Each day has 24 entries corresponding to the 24 hour periods in a day. The array starts from the first day in the range, then second, etc.
 
 ```
 [
@@ -404,6 +463,8 @@ POST /api/automations/
 
 ### Update an Automation
 
+Only send the new details.
+
 #### Request 
 
 | Parameter    | Type    | Required | Description                           |
@@ -415,7 +476,6 @@ POST /api/automations/
 ```
 PUT /api/automations/<automationId>/
 {
-    "automationId": 0,
     "dateTime": "...",
     "newState": [
         {
@@ -535,15 +595,16 @@ POST /api/goals/
 
 ### Update a Goal
 
-Updates the name and/or target of the goal with the goal ID of `goalId`.
+Updates the name and/or target of the goal with the goal ID of `goalId`, only send the new details.
 
 #### Request
 
-| Parameter | Type    | Required | Description      |
-| --------- | ------- | -------- | ---------------- |
-| name      | String  | No       | Name of the goal |
-| target    | Integer | No       | Goal Target      |
-| date      | String  | No       | Target Date      |
+| Parameter | Type    | Required | Description              |
+| --------- | ------- | -------- | ------------------------ |
+| goalId    | Integer | Yes      | Id of goal to be updated |
+| name      | String  | No       | Name of the goal         |
+| target    | Integer | No       | Goal Target              |
+| date      | String  | No       | Target Date              |
 
 
 ```
@@ -574,6 +635,10 @@ Delete the goal with the goal ID of `goalId`.
 
 #### Request
 
+| Parameter | Type    | Required | Description              |
+| --------- | ------- | -------- | ------------------------ |
+| goalId    | Integer | Yes      | Id of goal to be deleted |
+
 ```
 DELETE /api/goals/<goalId>/
 ```
@@ -591,17 +656,18 @@ Status 500 for failure
 
 #### Request 
 
-| Parameter  | Type   | Required | Description                                                                                                                   |
-| ---------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| timePeriod | String | Yes      | ("Day", "Week", "Month", "Year") fetches data from the search range grouped Day: Hours, Week: Days, Month: Days, Year: Months |
-| startDate  | String | Yes      | Start date of search range                                                                                                    |
-| endDate    | String | Yes      | End date of search range                                                                                                      |
+| Parameter | Type   | Required | Description                |
+| --------- | ------ | -------- | -------------------------- |
+| startDate | String | Yes      | Start date of search range |
+| endDate   | String | Yes      | End date of search range   |
 
 ```
-GET /api/?timePeriod=Day
+GET /api/?startDate=...&endDate=...
 ```
 
 #### Response
+
+Each element is the amount of energy used/generated in the period of an hour. Each day has 24 entries corresponding to the 24 hour periods in a day. The array starts from the first day in the range, then second, etc.
 
 ```
 {
@@ -617,6 +683,8 @@ GET /api/?timePeriod=Day
 ## Accounts
 
 ### Login 
+
+Password must be hashed string. Response is a authentication token that must be send as a header to all future requests ("token": "...").
 
 #### Request 
 
@@ -636,11 +704,14 @@ POST /api/accounts/login/
 #### Response
 
 ```
-Status 200 for success
-Status 500 for failure
+{
+    "token": "..."
+}
 ```
 
 ### Sign up for an account
+
+Password must be hashed string.
 
 #### Request 
 
@@ -660,9 +731,13 @@ POST /api/accounts/signup/
 #### Response
 
 ```
+Status 200 for success
+Status 500 for failure
 ```
 
 ## Tags
+
+Tags are of type: "User", "Room" or "Custom"
 
 ### Get all tags
 
@@ -688,6 +763,28 @@ GET /api/tags/
 ]
 ```
 
+### Get one tags
+
+#### Request 
+
+| Parameter | Type    | Required | Description               |
+| --------- | ------- | -------- | ------------------------- |
+| tagId     | Integer | Yes      | Id of tag to be retrieved |
+
+```
+GET /api/tags/<tagId>/
+```
+
+#### Response
+
+```
+{
+    "tagId": 0,
+    "name": "..."
+    "type": "..."
+}
+```
+
 ### Add a new tag
 
 #### Request 
@@ -699,6 +796,10 @@ GET /api/tags/
 
 ```
 POST /api/tags/
+{
+    "name": "...",
+    "type": "..."
+}
 ```
 
 #### Response
@@ -715,12 +816,12 @@ POST /api/tags/
 
 #### Request 
 
-| Parameter | Type    | Required | Description                |
-| --------- | ------- | -------- | -------------------------- |
-| tagId     | Integer | Yes      | tagId of tag to be deleted |
+| Parameter | Type    | Required | Description             |
+| --------- | ------- | -------- | ----------------------- |
+| tagId     | Integer | Yes      | Id of tag to be deleted |
 
 ```
-DELETE /api/tags/
+DELETE /api/tags/<tagId>/
 ```
 
 #### Response

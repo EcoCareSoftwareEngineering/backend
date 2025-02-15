@@ -99,7 +99,7 @@ class IotDeviceUsage(db.Model):
     """
     Store usage amount for IoT Devices
     deviceUsageId: Autoincrement primary key
-    date: Date of usage
+    date: Date of usage format - "yyyy-mm-dd"
     hour: Hour number of the day (0-23, 0: 00:00-01:00, 1: 01:00-02:00, ...)
     usage: Minutes active (0-60)
     """
@@ -118,7 +118,7 @@ class Automations(db.Model):
     Stores a IoT Device Automation
     automationId: Autoincrement primary key
     deviceId: Foreignn key to IoT Device associated with the automation
-    dateTime: Date and Time to run the automation
+    dateTime: Date and Time to run the automation - format "yyyy-mm-dd hh-mm-ss"
     newState: JSON state to update the IoT device with (see IotDevices.state for more info)
     """
 
@@ -138,7 +138,7 @@ class EnergySavingGoals(db.Model):
     target: Target amount of energy to save (in kWh)
     progress: Current amount of energy saved (in kWh)
     complete: Whether the goal has been reached
-    date: Optional Target Date
+    date: Optional Target Date format - "yyyy-mm-dd"
     """
 
     goalId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
@@ -153,7 +153,7 @@ class EnergyRecords(db.Model):
     """
     Stores Energy Records
     energyRecordId: Autoincrement primary key
-    date: Date of record
+    date: Date of record format - "yyyy-mm-dd"
     hour: Hour number of the day (0-23, 0: 00:00-01:00, 1: 01:00-02:00, ...)
     energyUse: Amount of energy used in last hour (in kWh)
     energyGeneration: Amount of energy generated in last hour (in kWh)
