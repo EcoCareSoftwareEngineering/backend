@@ -1,6 +1,6 @@
 from sqlalchemy import select, insert, text, update, delete
 import csv, json
-import datetime as datetime
+from datetime import datetime
 
 from . import db
 from .models import *

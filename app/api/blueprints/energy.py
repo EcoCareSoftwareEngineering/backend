@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy import and_
-import datetime
+from datetime import datetime
 from ...models import *
 from ... import db
 
@@ -27,8 +27,8 @@ def get_energy_usage():
 
     # Convert to date format
     try:
-        start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
-        end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d").date()
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
     except ValueError:
         return jsonify({"Error": "Invalid date format. Use YYYY-MM-DD"}), 400
 
