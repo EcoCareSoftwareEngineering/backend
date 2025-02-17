@@ -93,7 +93,7 @@ def post_goal_handler():
                 target=jsonresult["target"],
                 date=jsonresult["date"],
         )
-        .returning(EnergySavingGoals.goalID)
+        .returning(EnergySavingGoals.goalId)
     )
     
     with db.engine.connect() as conn:
@@ -128,17 +128,113 @@ def post_goal_handler():
 
     return jsonify(entry), 200
  
-    @goals_blueprint.route("/<int:goalId>/", methods=["PUT", "DELETE"])
-    def goals_update_handler(goal_id: int):
-        if request.method == "PUT":
-            return put_goal_update_handler(goal_id)
-        elif request.method == "DELETE":
-            return delete_goal_handler(goal_id)
-        return jsonify({"Error": "Invalid"}), 500
-    
-    def delete_goal_handler(goal_id: int):
-        statement = delete(EnergySavingGoals).where(EnergySavingGoals.goalId == goal_id)
-        with db.engine.connect() as conn:
-            results = conn.execute(statement)
-            conn.commit()
+@goals_blueprint.route("/<int:goalId>/", methods=["PUT", "DELETE"])
+def goals_update_handler(goal_id: int):
+    if request.method == "PUT":
+        return put_goal_update_handler(goal_id)
+    elif request.method == "DELETE":
+        return delete_goal_handler(goal_id)
+    return jsonify({"Error": "Invalid"}), 500
+
+def put_goal_update_handler(goal_id: int):
+    jsonresult = request.json
+    jlength = len(jsonresult)
+    if jlength <4 and jlength > 0:
+
+        try:
+                validate(
+                    jsonresult,
+                    {
+                        "id": "auto",
+                        "title": "Energy Goal",
+                        "description": "an energy saving goal",
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "target": {"type": "integer"},
+                            "date":{"type":"string"},
+                        },
+                    },
+                )
+        except:
+            return "", 500  # return error if validation can't be confirmed
         
+    if jlength == 1:
+        if "name" in jsonresult:
+            statement = (
+                    update(EnergySavingGoals)
+                    .where(EnergySavingGoals.goalId == goal_id)
+                    .values(date = jsonresult["name"])
+            )
+        elif "date" in jsonresult:
+            statement = (
+                update(EnergySavingGoals)
+                .where(EnergySavingGoals.goalId == goal_id)
+                .values(date = jsonresult["date"])
+            )
+        elif "target" in jsonresult:
+            statement = (
+                update(EnergySavingGoals)
+                .where(EnergySavingGoals.goalId == goal_id)
+                .values(target = jsonresult["target"])
+            )
+    elif jlength == 2:
+        if "name" and "date" in jsonresult:
+             statement = (
+                update(EnergySavingGoals)
+                .where(EnergySavingGoals.goalId == goal_id)
+                .values(date = jsonresult["date"], date = jsonresult["name"])
+             )
+        elif "name" and "target" in jsonresult:
+             statement = (
+                update(EnergySavingGoals)
+                .where(EnergySavingGoals.goalId == goal_id)
+                .values(date = jsonresult["target"], date = jsonresult["name"])
+             )
+        elif "target" and "date" in jsonresult:
+             statement = (
+                update(EnergySavingGoals)
+                .where(EnergySavingGoals.goalId == goal_id)
+                .values(date = jsonresult["date"], date = jsonresult["target"])
+             )
+    elif jlength == 3:
+        statement = (
+                update(EnergySavingGoals)
+                .where(EnergySavingGoals.goalId == goal_id)
+                .values(target = jsonresult["target"],target = jsonresult["target"],date = jsonresult["date"])
+            )
+    elif jlength > 4:
+        return ("",500,)
+    statement = select(EnergySavingGoals).where(EnergySavingGoals.goalId == goal_id)
+
+    with db.engine.connect() as conn:
+        result = conn.execute(statement).first()
+    if result is None:
+        return "", 500
+    (
+        goalId,
+        name,
+        target,
+        progress,
+        complete,
+        date,
+    ) = result
+
+    entry = {
+        "goalId": goalId,
+        "name": name,
+        "target": target,
+        "progress": progress,
+        "complete": complete,
+        "date": date,
+    }
+
+    return jsonify(entry), 200
+
+
+def delete_goal_handler(goal_id: int):
+    statement = delete(EnergySavingGoals).where(EnergySavingGoals.goalId == goal_id)
+    with db.engine.connect() as conn:
+        conn.execute(statement)
+        conn.commit()
+    
