@@ -81,7 +81,7 @@ def send_iot_device_update(device_id):
         description,
         state,
         status,
-        faultStatus,
+        _,
         _,
         _,
         _,
@@ -94,7 +94,6 @@ def send_iot_device_update(device_id):
         "description": description,
         "state": state,
         "status": "On" if status == IotDeviceStatus.On else "Off",
-        "faultStatus": ("Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault"),
     }
 
     emit("server_iot_device_update", device_update)
