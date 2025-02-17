@@ -209,7 +209,7 @@ def put_automations_update_handler(automation_id: int):
             conn.commit()
             # statement = update(Automations).where(Automations.automationId == jsonresult["automationId"])
 
-    elif jlength > 3:
+    elif jlength > 2:
         return (
             "",
             500,
