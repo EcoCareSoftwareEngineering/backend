@@ -1,3 +1,3 @@
-userId,username,passwordHash
-1,John Doe,$2a$12$eAnv1VHKsAfh/J5c4.NwsfZtWy6EZ5DpUnjA5ZZ2RtM47tggTugbq
-2,Jane Doe,$2a$12$z0rD9tpOe2y5Q2UQd.kNm4bxn9HfjjbREPRXYU7uFG4irT7z3FdDO
+userId,username,passwordHash,salt
+1,touchscreen,763e6302dde541150112c832f83d1990c932cdb99be17d2eaa29744080c518f2,df1bc4879218ad5a2e60d68011050ede
+2,filip,3afc4746d742c41499d28c4d0d2b0eca2c388c921d5d598c80085e0c0e432057,9921efe3a9668969afffc7fedc01a2c8

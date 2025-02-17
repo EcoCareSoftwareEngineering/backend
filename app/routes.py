@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import jsonify, request
 
-from . import local_device_config
+from . import local_device_config, tokens
 
 
 def register_routes(app):
@@ -24,8 +24,11 @@ def check_token(function):
         if token is None:
             return jsonify({"Error": "Missing authorisation token"}), 500
 
-        if token != local_device_config["touchscreenToken"]:
-            return jsonify({"Error": "Invalid authorisation token"}), 500
+        if not token in [tokens["local"], *tokens["remote"]]:
+            return jsonify({"Error": "Missing authorisation token"}), 500
+
+        if token == tokens["local"] and local_device_config["locked"]:
+            return jsonify({"Error": "Touchscreen Locked"}), 500
 
         return function(*args, **kwargs)
 
