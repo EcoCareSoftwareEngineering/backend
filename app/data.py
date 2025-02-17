@@ -154,7 +154,7 @@ def add_data():
             row["goalId"] = int(row["goalId"])
             row["target"] = float(row["goalId"])
             row["progress"] = float(row["progress"])
-            row["complete"] = bool(row["complete"])
+            row["complete"] = row["complete"] == "True"
             energy_saving_goal_data.append(
                 {key: value for key, value in row.items() if value != ""}
             )

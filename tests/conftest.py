@@ -62,8 +62,11 @@ def energy_saving_goals_data():
         row["goalId"] = int(row["goalId"])
         row["target"] = float(row["goalId"])
         row["progress"] = float(row["progress"])
-        row["complete"] = bool(row["complete"])
+        row["complete"] = row["complete"] == "True"
         data.append({key: value for key, value in row.items() if value != ""})
+
+    data[0]["date"] = "Wed, 02 Apr 2025 00:00:00 GMT"
+    data[1]["date"] = "Wed, 02 Apr 2025 00:00:00 GMT"
 
     return data
 

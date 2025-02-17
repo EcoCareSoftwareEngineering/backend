@@ -142,7 +142,7 @@ class EnergySavingGoals(db.Model):
     """
 
     goalId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    name = db.Column(db.String(25), nullable=True)
+    name = db.Column(db.String(100), nullable=True)
     target = db.Column(db.Float(), nullable=False)
     progress = db.Column(db.Float(), nullable=False, default=0)
     complete = db.Column(db.Boolean(), nullable=False, default=False)

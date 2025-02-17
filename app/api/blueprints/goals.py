@@ -66,7 +66,7 @@ def post_goal_handler():
     # Validate
     jsonresult = request.json
     if jsonresult is None:
-        return "", 500
+        return jsonify({}), 500
     else:
         try:
             validate(
@@ -85,7 +85,7 @@ def post_goal_handler():
                 },
             )
         except:
-            return "", 500  # return error if validation can't be confirmed
+            return jsonify({}), 500  # return error if validation can't be confirmed
 
     new_goal = (
         insert(EnergySavingGoals)
@@ -102,12 +102,15 @@ def post_goal_handler():
         conn.commit()
 
     if newId is None:
-        return "", 500
+        return jsonify({}), 500
 
-    result = select(EnergySavingGoals).where(EnergySavingGoals.goalId == newId[0])
+    statement = select(EnergySavingGoals).where(EnergySavingGoals.goalId == newId[0])
+
+    with db.engine.connect() as conn:
+        result = conn.execute(statement).first()
 
     if result is None:
-        return "", 500
+        return jsonify({}), 500
 
     (
         goalId,
@@ -130,7 +133,7 @@ def post_goal_handler():
     return jsonify(entry), 200
 
 
-@goals_blueprint.route("/<int:goalId>/", methods=["PUT", "DELETE"])
+@goals_blueprint.route("/<int:goal_id>/", methods=["PUT", "DELETE"])
 def goals_update_handler(goal_id: int):
     if request.method == "PUT":
         return put_goal_update_handler(goal_id)
@@ -142,6 +145,10 @@ def goals_update_handler(goal_id: int):
 # PUT - update a goal
 def put_goal_update_handler(goal_id: int):
     jsonresult = request.json
+
+    if jsonresult is None:
+        return jsonify({"Error": 1}), 500
+
     jlength = len(jsonresult)
     if jlength < 4 and jlength > 0:
 
@@ -161,7 +168,10 @@ def put_goal_update_handler(goal_id: int):
                 },
             )
         except:
-            return "", 500  # return error if validation can't be confirmed
+            return (
+                jsonify({"Error": 3}),
+                500,
+            )  # return error if validation can't be confirmed
 
     if jlength == 1:
         if "name" in jsonresult:
@@ -207,21 +217,27 @@ def put_goal_update_handler(goal_id: int):
             .where(EnergySavingGoals.goalId == goal_id)
             .values(
                 target=jsonresult["target"],
-                target=jsonresult["target"],
+                name=jsonresult["name"],
                 date=jsonresult["date"],
             )
         )
     elif jlength > 4:
         return (
-            "",
+            jsonify({"Error": 1}),
             500,
         )
-    statement = select(EnergySavingGoals).where(EnergySavingGoals.goalId == goal_id)
 
     with db.engine.connect() as conn:
+        conn.execute(statement)
+        conn.commit()
+
+    statement = select(EnergySavingGoals).where(EnergySavingGoals.goalId == goal_id)
+    with db.engine.connect() as conn:
         result = conn.execute(statement).first()
+
     if result is None:
-        return "", 500
+        return jsonify({"Error": 2}), 500
+
     (
         goalId,
         name,
@@ -249,3 +265,4 @@ def delete_goal_handler(goal_id: int):
     with db.engine.connect() as conn:
         conn.execute(statement)
         conn.commit()
+    return jsonify(), 200
