@@ -127,7 +127,8 @@ def post_goal_handler():
         }
 
     return jsonify(entry), 200
- 
+
+
 @goals_blueprint.route("/<int:goalId>/", methods=["PUT", "DELETE"])
 def goals_update_handler(goal_id: int):
     if request.method == "PUT":
@@ -136,10 +137,11 @@ def goals_update_handler(goal_id: int):
         return delete_goal_handler(goal_id)
     return jsonify({"Error": "Invalid"}), 500
 
+# PUT - update a goal
 def put_goal_update_handler(goal_id: int):
     jsonresult = request.json
     jlength = len(jsonresult)
-    if jlength <4 and jlength > 0:
+    if jlength < 4 and jlength > 0:
 
         try:
                 validate(
@@ -232,6 +234,7 @@ def put_goal_update_handler(goal_id: int):
     return jsonify(entry), 200
 
 
+# delete - delete a goal
 def delete_goal_handler(goal_id: int):
     statement = delete(EnergySavingGoals).where(EnergySavingGoals.goalId == goal_id)
     with db.engine.connect() as conn:
