@@ -51,6 +51,10 @@ def add_data():
             for entry in row["state"]:
                 if entry["datatype"] == "integer":
                     entry["value"] = int(entry["value"])
+                elif entry["datatype"] == "float":
+                    entry["value"] = float(entry["value"])
+                elif entry["datatype"] == "boolean":
+                    entry["value"] = bool(entry["value"])
             row["unlocked"] = bool(row["unlocked"])
 
             device_data.append(

@@ -26,6 +26,9 @@ def automations_data():
         row["newState"] = json.loads(row["newState"])
         data.append({key: value for key, value in row.items() if value != ""})
 
+    data[0]["dateTime"] = "Sun, 02 Feb 2025 08:00:00 GMT"
+    data[1]["dateTime"] = "Sun, 02 Feb 2025 09:00:00 GMT"
+
     return data
 
 

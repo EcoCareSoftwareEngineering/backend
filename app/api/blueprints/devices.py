@@ -1,9 +1,11 @@
 from flask import Blueprint, jsonify, request
+from flask_socketio import emit
 from sqlalchemy import select, insert, update, delete
 
 from ...models import *
-from ... import db
+from ... import db, socketio
 from ...routes import check_token
+from ...websockets.events import send_iot_device_update
 
 devices_blueprint = Blueprint("devices", __name__, url_prefix="/devices")
 
@@ -85,6 +87,10 @@ def devices_update_handler(device_id: int):
 
 
 def put_devices_update_handler(device_id: int):
+
+    # After the DB has been updated, if there was an update call send_iot_device_update (used for spoof app communication)
+    send_iot_device_update(device_id)
+
     return (
         jsonify({"endpoint": "PUT_devices_update_handler", "deviceId": device_id}),
         200,
