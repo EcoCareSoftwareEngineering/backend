@@ -3,9 +3,10 @@ from flask_socketio import emit
 from sqlalchemy import select, insert, update, delete
 
 from ...models import *
-from ... import db, socketio
+from ... import db, socketio, unconnected_iot_devices
 from ...routes import check_token
 from ...websockets.events import send_iot_device_update
+from jsonschema import *
 
 devices_blueprint = Blueprint("devices", __name__, url_prefix="/devices")
 
@@ -69,12 +70,36 @@ def get_devices_handler():
 
 
 def post_devices_handler():
-    return jsonify({"endpoint": "POST_devices_handler"}), 200
+    jsonresult = request.json
+    if jsonresult is None:
+        return "", 500
+    else:
+        try:
+            validate(
+                jsonresult,
+                {
+                    "properties": {
+                        "ipAddress": {"type": "string"},
+                    },
+                    "required": ["ipAddress"],
+                },
+            )
+        except:
+            return "", 500
+    response = []
+    deletePos = -1
+    for entry in unconnected_iot_devices:
+        deletePos = deletePos + 1
+        if entry["ipAddress"] == jsonresult["ipAddress"]:
+            response.append(entry)
+    if response != []:
+        unconnected_iot_devices.pop(deletePos)
+    return jsonify(response), 200
 
 
 @devices_blueprint.route("/new/", methods=["GET"])
 def devices_new_handler():
-    return jsonify({"endpoint": "devices_new_handler"}), 200
+    return jsonify(unconnected_iot_devices), 200
 
 
 @devices_blueprint.route("/<int:device_id>/", methods=["PUT", "DELETE"])
