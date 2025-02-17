@@ -50,7 +50,7 @@ def get_energy_usage():
         return jsonify({"Error": "No records found for the given date range"}), 404
 
     energy_usage = [record.energyUse for record in results]
-    energy_generation = [record.energyUse for record in results]
+    energy_generation = [record.energyGeneration for record in results]
     
 
     response = {
