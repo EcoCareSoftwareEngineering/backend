@@ -176,3 +176,4 @@ class Users(db.Model):
     userId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), nullable=False)
     passwordHash = db.Column(db.String(100), nullable=False)
+    salt = db.Column(db.String(100), nullable=False)

@@ -14,6 +14,7 @@ db = SQLAlchemy()
 
 with open("config/smart_home_config.json") as file:
     local_device_config = json.load(file)
+    local_device_config["locked"] = bool(local_device_config["locked"])
 
 unconnected_iot_devices = []
 
@@ -36,6 +37,8 @@ unconnected_iot_devices = []
 #         "faultStatus": "Ok",
 #     },
 # ]
+
+tokens = {"remote": [], "local": None}
 
 
 def create_app():

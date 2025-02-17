@@ -1,4 +1,5 @@
 {
     "pinCode": "0000",
-    "touchscreenToken": "token"
+    "touchscreenToken": "token",
+    "locked": true
 }
