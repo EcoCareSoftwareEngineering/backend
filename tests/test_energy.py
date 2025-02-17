@@ -4,17 +4,16 @@ import requests
 # Base URL for energy
 BASE_URL = "http://127.0.0.1:5000/api/energy/"
 
-# Expected energy data for validation for the first record 
-expected_record = {
-    "energyRecordId": 1,
-    "date": "2025-01-01",
-    "hour": 0,
-    "energyUse": 0.1,
-    "energyGeneration": 0
-}
-
 # Test GET request to retrive energy records
 def test_get_energy_records(energy_records_data):
+    
+    # Filter energy_records_data to match the requested date range (2025-01-01 to 2025-01-02)
+    filtered_data = [record for record in energy_records_data if "2025-01-01" <= record["date"] <= "2025-01-02"]
+    
+    # Arrays energyUse and energyGeneration from filtered energy_records_data
+    expected_energy_use_values = [record["energyUse"] for record in filtered_data]
+    expected_energy_generation_values = [record["energyGeneration"] for record in filtered_data]
+    
     # GET request to API
     response = requests.get(BASE_URL, params={"startDate": "2025-01-01", "endDate": "2025-01-02"})
     
@@ -35,15 +34,18 @@ def test_get_energy_records(energy_records_data):
     assert len(data["energyUsage"]) > 0, "energyUsage list is empty"
     assert len(data["energyGeneration"]) > 0, "energyGeneration list is empty"
 
-    # Get the first record 
-    first_record_energy_usage = data["energyUsage"][0]
-    first_record_energy_generation = data["energyGeneration"][0]
+    # Debugging to see the expected values
+    print("Expected Energy Use Values:", expected_energy_use_values)
+    print("Expected Energy Generation Values:", expected_energy_generation_values)
 
-    # Compare with the expected values
-    assert first_record_energy_usage == expected_record["energyUse"], f"Expected {expected_record['energyUse']}, got {first_record_energy_usage}"
-    assert first_record_energy_generation == expected_record["energyGeneration"], f"Expected {expected_record['energyGeneration']}, got {first_record_energy_generation}"
+    # The Actual data 
+    print("Data energyUsage ",  data["energyUsage"])
+    print("Data energyGeneration ",  data["energyGeneration"])
+
+    # Compare the energyUSe and energyGeneratin arrays with response
+    assert data["energyUsage"] == expected_energy_use_values, f"Expected {expected_energy_use_values}, got {data['energyUsage']}"
+    assert data["energyGeneration"] == expected_energy_generation_values, f"Expected {expected_energy_generation_values}, got {data['energyGeneration']}"
     
-
 # Test for date range with no records exist
 def test_get_energy_records_not_found():
     response = requests.get(BASE_URL, params={"startDate": "2100-01-01", "endDate": "2100-01-02"})  # Future dates with no data
