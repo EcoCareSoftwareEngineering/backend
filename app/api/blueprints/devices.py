@@ -69,6 +69,7 @@ def get_devices_handler():
     return jsonify(data_to_send), 200
 
 
+# curl -X POST -H "Content-Type: application/json" -d '{"ipAddress": "192.168.0.10"}' http://127.0.0.1:5000/api/devices/
 def post_devices_handler():
     jsonresult = request.json
     if jsonresult is None:
@@ -86,15 +87,70 @@ def post_devices_handler():
             )
         except:
             return "", 500
-    response = []
+
     deletePos = -1
+    found = False
     for entry in unconnected_iot_devices:
         deletePos = deletePos + 1
         if entry["ipAddress"] == jsonresult["ipAddress"]:
-            response.append(entry)
-    if response != []:
+            find = entry
+            found = True
+    if found:
         unconnected_iot_devices.pop(deletePos)
-    return jsonify(response), 200
+        response = []
+        statement = (
+            insert(IotDevices)
+            .values(
+                name=find["name"],
+                description=find["description"],
+                state=find["state"],
+                status=find["status"],
+                faultStatus=find["faultStatus"],
+                ipAddress=find["ipAddress"],
+            )
+            .returning(IotDevices.deviceId)
+        )
+        with db.engine.connect() as conn:
+            newId = conn.execute(statement).first()
+            conn.commit()
+        statement = select(IotDevices).where(IotDevices.deviceId == newId[0])
+        with db.engine.connect() as conn:
+            result = conn.execute(
+                statement
+            ).first()  # just to make sure we only get one even if something messes up
+
+        if result is None:
+            return "", 500
+
+        (
+            deviceId,
+            name,
+            description,
+            state,
+            status,
+            faultStatus,
+            pinCode,
+            unlocked,
+            uptimeTimestamp,
+            ipAddress,
+        ) = result
+
+        package = {
+            "deviceId": deviceId,
+            "name": name,
+            "description": description,
+            "state": state,
+            "status": "On" if status == IotDeviceStatus.On else "Off",
+            "faultStatus": "Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault",
+            "pinCode": pinCode,
+            "unlocked": unlocked,
+            "uptimeTimestamp": uptimeTimestamp,
+            "ipAddress": ipAddress,
+        }
+
+        return jsonify(package), 200
+    else:
+        return "", 500
 
 
 @devices_blueprint.route("/new/", methods=["GET"])
@@ -123,10 +179,19 @@ def put_devices_update_handler(device_id: int):
 
 
 def delete_devices_update_handler(device_id: int):
-    return (
-        jsonify({"endpoint": "DELETE_devices_update_handler", "deviceId": device_id}),
-        200,
-    )
+    statement = delete(Automations).where(Automations.deviceId == device_id)
+    with db.engine.connect() as conn:
+        conn.execute(statement)
+        conn.commit()
+    # now that we've deleted all the connected automations
+    statement = delete(IotDevices).where(IotDevices.deviceId == device_id)
+    with db.engine.connect() as conn:
+        results = conn.execute(statement)
+        conn.commit()
+    if results.rowcount > 0:
+        return "", 200
+    else:
+        return "", 500
 
 
 @devices_blueprint.route("/unlock/<int:device_id>/", methods=["POST"])
