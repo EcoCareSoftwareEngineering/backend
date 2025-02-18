@@ -252,7 +252,7 @@ Updates the IoT Device's details/state that correspond to `deviceID`, only send 
 | name        | String           | No       | device name        |
 | description | String           | No       | device description |
 | state       | JSON             | No       | device state       |
-| roomTag     | String           | No       | room tag           |
+| roomTag     | Integer          | No       | room tag           |
 | userTags    | Array of Strings | No       | user tags          |
 | customTags  | Array of Strings | No       | custom tags        |
 
@@ -268,7 +268,7 @@ PUT /api/devices/<deviceId>/
             "value": 2
         }
     ],
-    "roomTag": "Kitchen",
+    "roomTag": 5,
     "userTags": [0, 1, ...],
     "customTags": [2, 3, ...]
 }
