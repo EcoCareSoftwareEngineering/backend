@@ -302,6 +302,20 @@ def put_devices_update_handler(device_id: int):
 
 
 def delete_devices_update_handler(device_id: int):
+    # remove all automations, device usage and tag connections to this device
+    statement = delete(Automations).where(Automations.deviceId == device_id)
+    with db.engine.connect() as conn:
+        conn.execute(statement)
+        conn.commit()
+    statement = delete(IotDeviceUsage).where(IotDeviceUsage.deviceId == device_id)
+    with db.engine.connect() as conn:
+        conn.execute(statement)
+        conn.commit()
+    statement = delete(IotDevicesTags).where(IotDevicesTags.deviceId == device_id)
+    with db.engine.connect() as conn:
+        conn.execute(statement)
+        conn.commit()
+    # now we can delete the device
     statement = delete(IotDevices).where(IotDevices.deviceId == device_id)
     with db.engine.connect() as conn:
         results = conn.execute(statement)
