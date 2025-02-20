@@ -55,12 +55,13 @@ def add_data():
                     entry["value"] = float(entry["value"])
                 elif entry["datatype"] == "boolean":
                     entry["value"] = bool(entry["value"])
-            row["unlocked"] = bool(row["unlocked"])
+            row["unlocked"] = row["unlocked"] == "True"
 
             device_data.append(
                 {key: value for key, value in row.items() if value != ""}
             )
-
+        print(device_rows, flush=True)
+        print(device_data, flush=True)
         conn.execute(insert(IotDevices), device_data)
 
         # Data for tags

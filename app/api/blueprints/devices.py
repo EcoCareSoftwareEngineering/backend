@@ -51,7 +51,7 @@ def get_devices_handler():
         ) = result
 
         # Data processing here
-
+        print(result, flush=True)
         entry = {
             "deviceId": deviceId,
             "name": name,
