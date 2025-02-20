@@ -59,7 +59,7 @@ def get_devices_handler():
             "state": state,
             "status": "On" if status == IotDeviceStatus.On else "Off",
             "faultStatus": "Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault",
-            "pinEnabled": pinCode is not None,
+            "pinEnabled": pinCode != "None",
             "unlocked": unlocked,
             "uptimeTimestamp": uptimeTimestamp,
             "ipAddress": ipAddress,
@@ -326,6 +326,8 @@ def delete_devices_update_handler(device_id: int):
         return "", 500
 
 
+# curl -X POST -H "Content-Type: application/json" -d '{"pin": "1234"}' http://127.0.0.1:5000/api/devices/unlock/6/
+# ^ change entry 6 in iot_devices.csv to have a pincode and unlocked = false before using this
 @devices_blueprint.route("/unlock/<int:device_id>/", methods=["POST"])
 def devices_unlock_handler(device_id: int):
     # check if pinenabled
