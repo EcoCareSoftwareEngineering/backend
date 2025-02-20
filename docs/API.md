@@ -376,10 +376,17 @@ Each element is the number of minutes the device was active in the period of an 
 
 ```
 [
-    50,
-    20,
-    30,
+    {
+        "deviceId": 0,
+        "usage": [
+            50,
+            20,
+            30,
+        ]
+    },
+    ...
 ]
+
 ```
 
 

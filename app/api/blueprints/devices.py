@@ -380,4 +380,36 @@ def devices_unlock_handler(device_id: int):
 
 @devices_blueprint.route("/usage/", methods=["GET"])
 def devices_usage_handler():
-    return jsonify({"endpoint": "devices_usage_handler"}), 200
+    start_date = request.args.get("rangeStart")
+    end_date = request.args.get("rangeEnd")
+    deviceId = request.args.get("deviceId")
+
+    if start_date is None or end_date is None:
+        return jsonify({}), 500
+
+    statement = select(IotDeviceUsage.deviceId, IotDeviceUsage.usage)
+
+    if deviceId is not None:
+        statement = statement.where(IotDeviceUsage.deviceId == deviceId)
+
+    statement = statement.where(IotDeviceUsage.date >= start_date)
+    statement = statement.where(IotDeviceUsage.date <= end_date)
+
+    with db.engine.connect() as conn:
+        results = conn.execute(statement)
+
+    if statement is None:
+        return jsonify([]), 200
+
+    response = []
+    ids = []
+    for result in results:
+        (device_id, usage) = result
+
+        if device_id not in ids:
+            ids.append(device_id)
+            response.append({"deviceId": device_id, "usage": []})
+
+        response[ids.index(device_id)]["usage"].append(usage)
+
+    return jsonify(response), 200
