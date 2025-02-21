@@ -48,7 +48,7 @@ def get_automations_handler():
     return jsonify(response), 200
 
 
-# curl -X POST -H "Content-Type: application/json" -d '{"deviceId": 2, "dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/
+# curl -X POST -H "Content-Type: application/json" -d '{"deviceId": 2, "dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "datatype": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/
 def post_automations_handler():
     jsonresult = request.json
     if jsonresult is None:
@@ -71,7 +71,7 @@ def post_automations_handler():
                                 "type": "object",
                                 "properties": {
                                     "fieldName": {"type": "string"},
-                                    "dataType": {"type": "string"},
+                                    "datatype": {"type": "string"},
                                     "value": {
                                         "oneOf": [
                                             {"type": "string"},
@@ -80,7 +80,7 @@ def post_automations_handler():
                                         ]
                                     },
                                 },
-                                "required": ["fieldName", "dataType", "value"],
+                                "required": ["fieldName", "datatype", "value"],
                             },
                         },
                     },
@@ -143,7 +143,7 @@ def automations_update_handler(automation_id: int):
     return jsonify({"Error": "Invalid"}), 500
 
 
-# curl -X PUT -H "Content-Type: application/json" -d '{"dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/34/
+# curl -X PUT -H "Content-Type: application/json" -d '{"dateTime": "2000-03-15 23:20:30", "newState": [{"fieldName": "hue", "datatype": "integer", "value": 2}]}' http://127.0.0.1:5000/api/automations/34/
 def put_automations_update_handler(automation_id: int):
     jsonresult = request.json
     jlength = len(jsonresult)
@@ -164,7 +164,7 @@ def put_automations_update_handler(automation_id: int):
                                 "type": "object",
                                 "properties": {
                                     "fieldName": {"type": "string"},
-                                    "dataType": {"type": "string"},
+                                    "datatype": {"type": "string"},
                                     "value": {
                                         "oneOf": [
                                             {"type": "string"},
@@ -173,7 +173,7 @@ def put_automations_update_handler(automation_id: int):
                                         ]
                                     },
                                 },
-                                "required": ["fieldName", "dataType", "value"],
+                                "required": ["fieldName", "datatype", "value"],
                             },
                         },
                     },
