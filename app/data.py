@@ -60,8 +60,7 @@ def add_data():
             device_data.append(
                 {key: value for key, value in row.items() if value != ""}
             )
-        print(device_rows, flush=True)
-        print(device_data, flush=True)
+
         conn.execute(insert(IotDevices), device_data)
 
         # Data for tags

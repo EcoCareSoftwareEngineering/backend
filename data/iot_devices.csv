@@ -2,7 +2,7 @@ deviceId,name,description,state,status,faultStatus,pinCode,unlocked,uptimeTimest
 1,Bedroom Light,A smart lightbulb,"[{""fieldName"": ""hue"", ""datatype"": ""integer"", ""value"": ""2""}]",On,Ok,None,True,,192.168.0.2
 2,Smart TV,A smart tv,"[{""fieldName"": ""channel"", ""datatype"": ""integer"", ""value"": ""3""}]",On,Ok,None,True,,192.168.0.3
 3,Thermostat,Central Heating Thermostat,"[{""fieldName"": ""temperature"", ""datatype"": ""float"", ""value"": ""18.0""}]",On,Ok,None,True,,192.168.0.4
-4,Smart Fridge,A smart fridge,"{}",On,Ok,None,True,,192.168.0.5
+4,Smart Fridge,A smart fridge,"[]",On,Ok,None,True,,192.168.0.5
 5,Radio and Speaker,Radio and Bluetooth Speaker ,"[{""fieldName"": ""station"", ""datatype"": ""integer"", ""value"": ""3""}]",Off,Ok,None,True,,192.168.0.6
-6,Hall Light,A smart lightbulbt,"{}",On,Ok,None,True,,192.168.0.7
-7,Energy Meter,Household energy meter,"{}",On,Ok,None,True,,192.168.0.8
+6,Hall Light,A smart lightbulbt,"[]",On,Ok,None,True,,192.168.0.7
+7,Energy Meter,Household energy meter,"[]",On,Ok,None,True,,192.168.0.8

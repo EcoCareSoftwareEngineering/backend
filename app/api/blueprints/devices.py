@@ -21,16 +21,72 @@ def devices_handler():
 
 
 def get_devices_handler():
-    if request.args.get("status") == "Fault":
-        statement = select(IotDevices).where(
-            IotDevices.status == IotDeviceFaultStatus.Fault
+    statement = select(IotDevices)
+
+    device_id = request.args.get("deviceId")
+    if device_id is not None:
+        statement = statement.where(IotDevices.deviceId == device_id)
+
+    name = request.args.get("name")
+    if name is not None:
+        statement = statement.where(IotDevices.name == name)
+
+    status = request.args.get("status")
+    if status is not None:
+        statement = statement.where(
+            IotDevices.status
+            == (IotDeviceStatus.On if status == "On" else IotDeviceStatus.Off)
         )
-    elif request.args.get("status") == "Ok":
-        statement = select(IotDevices).where(
-            IotDevices.status == IotDeviceFaultStatus.Ok
+
+    fault_status = request.args.get("faultStatus")
+    if fault_status is not None:
+        statement = statement.where(
+            IotDevices.faultStatus
+            == (
+                IotDeviceFaultStatus.Ok
+                if status == "Ok"
+                else IotDeviceFaultStatus.Fault
+            )
         )
-    else:
-        statement = select(IotDevices)
+
+    roomTag = request.args.get("roomTag")
+    if roomTag is not None:
+        tags_statement = select(IotDevicesTags.deviceId).where(
+            IotDevicesTags.tagId == roomTag
+        )
+
+        with db.engine.connect() as conn:
+            results = conn.execute(tags_statement)
+
+        ids = [result[0] for result in results]
+
+        statement = statement.where(IotDevices.deviceId.in_(ids))
+
+    userTag = request.args.get("userTag")
+    if userTag is not None:
+        tags_statement = select(IotDevicesTags.deviceId).where(
+            IotDevicesTags.tagId == userTag
+        )
+
+        with db.engine.connect() as conn:
+            results = conn.execute(tags_statement)
+
+        ids = [result[0] for result in results]
+
+        statement = statement.where(IotDevices.deviceId.in_(ids))
+
+    customTag = request.args.get("customTag")
+    if customTag is not None:
+        tags_statement = select(IotDevicesTags.deviceId).where(
+            IotDevicesTags.tagId == customTag
+        )
+
+        with db.engine.connect() as conn:
+            results = conn.execute(tags_statement)
+
+        ids = [result[0] for result in results]
+
+        statement = statement.where(IotDevices.deviceId.in_(ids))
 
     with db.engine.connect() as conn:
         results = conn.execute(statement)
@@ -50,8 +106,29 @@ def get_devices_handler():
             ipAddress,
         ) = result
 
-        # Data processing here
-        print(result, flush=True)
+        statement = (
+            select(Tags.tagId, Tags.tagType)
+            .join(IotDevicesTags, Tags.tagId == IotDevicesTags.tagId)
+            .join(IotDevices, IotDevices.deviceId == IotDevicesTags.deviceId)
+            .where(IotDevices.deviceId == deviceId)
+        )
+
+        roomTag = None
+        userTags = []
+        customTags = []
+
+        with db.engine.connect() as conn:
+            results = conn.execute(statement)
+
+        for result in results:
+            (tag_id, tag_type) = result
+            if tag_type == TagType.Room:
+                roomTag = tag_id
+            if tag_type == TagType.User:
+                userTags.append(tag_id)
+            if tag_type == TagType.Custom:
+                customTags.append(tag_id)
+
         entry = {
             "deviceId": deviceId,
             "name": name,
@@ -63,6 +140,9 @@ def get_devices_handler():
             "unlocked": unlocked,
             "uptimeTimestamp": uptimeTimestamp,
             "ipAddress": ipAddress,
+            "roomTag": roomTag,
+            "userTags": userTags,
+            "customTags": customTags,
         }
         data_to_send.append(entry)
 
@@ -168,137 +248,124 @@ def devices_update_handler(device_id: int):
 
 
 def put_devices_update_handler(device_id: int):
-    # jsonresult = request.json
-    # if jsonresult is None:
-    #     return "", 500
-    # else:
-    #     try:
-    #         validate(
-    #             jsonresult,
-    #             {
-    #                 "id": "devices",
-    #                 "title": "device",
-    #                 "description": "an iot Device",
-    #                 "type": "object",
-    #                 "properties": {
-    #                     "name": {"type": "string"},
-    #                     "description": {"type": "string"},
-    #                     "state": {
-    #                         "type": "array",
-    #                         "items": {
-    #                             "type": "object",
-    #                             "properties": {
-    #                                 "fieldName": {"type": "string"},
-    #                                 "dataType": {"type": "string"},
-    #                                 "value": {
-    #                                     "oneOf": [
-    #                                         {"type": "string"},
-    #                                         {"type": "number"},
-    #                                         {"type": "boolean"},
-    #                                     ]
-    #                                 },
-    #                             },
-    #                             "required": ["fieldName", "dataType", "value"],
-    #                         },
-    #                     },
-    #                     "roomTag": {"type": "integer"},
-    #                     "userTags": {
-    #                         "type": "array",
-    #                         "items": {
-    #                             "type": "string",
-    #                         },
-    #                     },
-    #                     "customTags": {
-    #                         "type": "array",
-    #                         "items": {
-    #                             "type": "string",
-    #                         },
-    #                     },
-    #                 },
-    #             },
-    #         )
-    #     except:
-    #         return "", 500
-    #     if "name" in jsonresult:
-    #         statement = (
-    #             update(IotDevices)
-    #             .where(IotDevices.deviceId == device_id)
-    #             .values(name=jsonresult["name"])
-    #         )
-    #     if "description" in jsonresult:
-    #         statement = (
-    #             update(IotDevices)
-    #             .where(IotDevices.deviceId == device_id)
-    #             .values(name=jsonresult["description"])
-    #         )
-    #     if "state" in jsonresult:
-    #         statement = (
-    #             update(IotDevices)
-    #             .where(IotDevices.deviceId == device_id)
-    #             .values(name=jsonresult["state"])
-    #         )
-    #     #here I'm going to delete all the tags not in any of my tag lists before adding any
-    #     statement = select(IotDevicesTags).where(
-    #             IotDevicesTags.deviceId == device_id
-    #         )
-    #     with db.engine.connect() as conn:
-    #         tagList = conn.execute(statement)
-    #     for t in tagList:
-    #         (
-    #             device_id,
-    #             tagId,
-    #         ) = tagList
-    #         deleteFlag = True
-    #         if "userTags" in jsonresult:
-    #             if jsonresult["userTags"].count(tagId) != 0: #we have this tagId in our usertag list
-    #                 deleteFlag = True
-    #         if "customTags" in jsonresult:
-    #             if jsonresult["customTags"].count(tagId) != 0: #we have this tagId in our usertag list
-    #                 deleteFlag = True
-    #         if "roomTag" in jsonresult:
-    #             if jsonresult["roomTag"] == tagId:
-    #                 deleteFlag = True
-    #         if not deleteFlag: #this tagId is not in any of our tag lists so it needs to be removed from the bridge table connecting this device to that tagid
-    #             statement = delete(IotDevicesTags).where(IotDevicesTags.deviceId == device_id).where(IotDevicesTags.tagId == tagId)
-    #             with db.engine.connect() as conn:
-    #                 conn.execute(statement)
-    #                 conn.commit()
-    #     #now that we've removed all the tags that aren't in our taglists we can add any tags that aren't already inside
-    #     if "userTags" in jsonresult:
-    #         users = jsonresult["userTags"].copy()
-    #         statement = select(IotDevicesTags).where(
-    #             IotDevicesTags.deviceId == device_id
-    #         )
-    #         with db.engine.connect() as conn:
-    #             tagList = conn.execute(statement)
-    #         for t in tagList:
-    #             (
-    #                 device_id,
-    #                 tagId,
-    #             ) = tagList
-    #             if jsonresult["userTags"].count(tagId) == 0: #we don't have this tagId in our new list
-    #                 if "customTags" in jsonresult:
+    json = request.json
+    if json is None:
+        return jsonify({}), 500
 
-    #         statement = (
-    #             update(IotDevices)
-    #             .where(IotDevices.deviceId == device_id)
-    #             .values(name=jsonresult[""])
-    #         )
+    values = {}
 
-    # # After the DB has been updated, if there was an update call send_iot_device_update (used for spoof app communication)
-    # send_iot_device_update(device_id)
-    # return (
-    #     jsonify({"endpoint": "PUT_devices_update_handler", "deviceId": device_id}),
-    #     200,
-    # )
+    if "name" in json:
+        values["name"] = json["name"]
+    if "description" in json:
+        values["description"] = json["description"]
+    if "state" in json:
+        values["state"] = json["state"]
+
+    update_statement = (
+        update(IotDevices).where(IotDevices.deviceId == device_id).values(**values)
+    )
+    delete_tags_statement = delete(IotDevicesTags).where(
+        IotDevicesTags.deviceId == device_id
+    )
+
+    room_tag = None
+
+    statement = select(IotDevicesTags.tagId).where(IotDevicesTags.deviceId == device_id)
+    with db.engine.connect() as conn:
+        result = conn.execute(statement).first()
+
+    if result is not None:
+        room_tag = result[0]
+
+    rows = []
+    if "roomTag" in json:
+        rows.append({"deviceId": device_id, "tagId": int(json["roomTag"])})
+    elif room_tag is not None:
+        rows.append({"deviceId": device_id, "tagId": int(room_tag)})
+    if "userTag" in json:
+        rows.append(
+            {"deviceId": device_id, "tagId": int(tag_id)} for tag_id in json["userTag"]
+        )
+    if "customTag" in json:
+        rows.append(
+            {"deviceId": device_id, "tagId": int(tag_id)}
+            for tag_id in json["customTag"]
+        )
+
+    with db.engine.connect() as conn:
+        if values != {}:
+            conn.execute(update_statement)
+        conn.execute(delete_tags_statement)
+        if rows != []:
+            conn.execute(insert(IotDevicesTags), rows)
+        conn.commit()
 
     # After the DB has been updated, if there was an update call send_iot_device_update (used for spoof app communication)
     send_iot_device_update(device_id)
 
-    return (
-        jsonify({"endpoint": "PUT_devices_update_handler", "deviceId": device_id}),
-        200,
-    )
+    statement = select(IotDevices).where(IotDevices.deviceId == device_id)
+
+    with db.engine.connect() as conn:
+        results = conn.execute(statement)
+
+    response = []
+    for result in results:
+        (
+            deviceId,
+            name,
+            description,
+            state,
+            status,
+            faultStatus,
+            pinCode,
+            unlocked,
+            uptimeTimestamp,
+            ipAddress,
+        ) = result
+
+        # Get tags
+
+        statement = (
+            select(Tags.tagId, Tags.tagType)
+            .join(IotDevicesTags, Tags.tagId == IotDevicesTags.tagId)
+            .join(IotDevices, IotDevices.deviceId == IotDevicesTags.deviceId)
+            .where(IotDevices.deviceId == deviceId)
+        )
+
+        roomTag = None
+        userTags = []
+        customTags = []
+
+        with db.engine.connect() as conn:
+            results = conn.execute(statement)
+
+        for result in results:
+            (tag_id, tag_type) = result
+            if tag_type == TagType.Room:
+                roomTag = tag_id
+            if tag_type == TagType.User:
+                userTags.append(tag_id)
+            if tag_type == TagType.Custom:
+                customTags.append(tag_id)
+
+        entry = {
+            "deviceId": deviceId,
+            "name": name,
+            "description": description,
+            "state": state,
+            "status": "On" if status == IotDeviceStatus.On else "Off",
+            "faultStatus": "Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault",
+            "pinEnabled": pinCode != "None",
+            "unlocked": unlocked,
+            "uptimeTimestamp": uptimeTimestamp,
+            "ipAddress": ipAddress,
+            "roomTag": roomTag,
+            "userTags": userTags,
+            "customTags": customTags,
+        }
+        response.append(entry)
+
+    return jsonify(response), 200
 
 
 def delete_devices_update_handler(device_id: int):
