@@ -8,7 +8,7 @@ For more information on data stored in the database see [models.py](../app/model
 
 ## Authentication
 
-To use the API all requests must be accompanied with an Authentication token in request headers. The token is aquired by sending a request to `.../accoutns/login/` with valid login credentials. The API will respond with a token to be used in future requests. `.../accounts/.../` are only endpoints that do not require a token for obvious reasons.
+To use the API all requests must be accompanied with an Authentication token in request headers. The token is aquired by sending a request to `.../accoutns/login/` with valid login credentials. The API will respond with a token to be used in future requests. `.../accounts/.../` are only endpoints that do not require a token for obvious reasons. To send the token as "token": ..." as a header.
 
 The touchscreen frontend should use the following login credentials and make an automatic call upon startup:
 - Username: "touchscreen"
