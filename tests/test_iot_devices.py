@@ -145,3 +145,22 @@ def test_unlock_iot_device(iot_devices_data, iot_devices_tags_data, tags_data):
 
     response = requests.get("http://127.0.0.1:5000/api/devices/").json()
     assert response == devices
+
+
+def test_iot_devices_usage(iot_device_usage_data):
+    usages = []
+    ids = []
+
+    for usage in iot_device_usage_data:
+        if usage["deviceId"] not in ids:
+            ids.append(usage["deviceId"])
+            usages.append({"deviceId": usage["deviceId"], "usage": []})
+
+        for entry in usages:
+            if entry["deviceId"] == usage["deviceId"]:
+                entry["usage"].append(usage["usage"])
+
+    response = requests.get(
+        "http://127.0.0.1:5000/api/devices/usage/?rangeStart=2025-01-01&rangeEnd=2025-02-01"
+    ).json()
+    assert response == usages
