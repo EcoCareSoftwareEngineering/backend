@@ -1,6 +1,6 @@
 from sqlalchemy import select, insert, text, update, delete
 import csv, json
-import datetime as datetime
+from datetime import datetime
 
 from . import db
 from .models import *
@@ -173,6 +173,7 @@ def add_data():
         energy_record_data = []
         for row in energy_record_rows:
             row["energyRecordId"] = int(row["energyRecordId"])
+            row["date"] = datetime.strptime(row["date"], "%Y-%m-%d")
             row["hour"] = int(row["hour"])
             row["energyUse"] = float(row["energyUse"])
             row["energyGeneration"] = float(row["energyGeneration"])
