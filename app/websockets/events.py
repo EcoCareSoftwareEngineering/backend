@@ -3,7 +3,7 @@ from sqlalchemy import select, update
 
 from ..models import IotDeviceFaultStatus, IotDeviceStatus, IotDevices
 
-from .. import db, unconnected_iot_devices
+from .. import db, unconnected_iot_devices, socketio
 
 
 def register_socketio_handlers(socketio: SocketIO):
@@ -96,4 +96,7 @@ def send_iot_device_update(device_id):
         "status": "On" if status == IotDeviceStatus.On else "Off",
     }
 
-    emit("server_iot_device_update", device_update)
+    try:
+        socketio.emit("server_iot_device_update", device_update)
+    except Exception:
+        pass

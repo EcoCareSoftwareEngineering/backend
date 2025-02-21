@@ -119,12 +119,12 @@ Fetches all IoT devices connected to the smart home.
 | name        | String  | No       | Search for device starting with name | No search |
 | status      | String  | No       | "On" \| "Off"                        | Both      |
 | faultStatus | String  | No       | "Ok" \| "Fault"                      | Both      |
-| roomTag     | String  | No       | Tag name to search for               | No search |
-| userTag     | String  | No       | Tag name to search for               | No search |
-| customTag   | String  | No       | Tag name to search for               | No search |
+| roomTag     | Integer | No       | Tag name to search for               | No search |
+| userTag     | Integer | No       | Tag name to search for               | No search |
+| customTag   | Integer | No       | Tag name to search for               | No search |
 
 ```
-GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&customTag=...
+GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=1&userTag=2&customTag=...
 ```
 
 #### Response
@@ -256,7 +256,7 @@ Updates the IoT Device's details/state that correspond to `deviceID`, only send 
 | name        | String           | No       | device name        |
 | description | String           | No       | device description |
 | state       | JSON             | No       | device state       |
-| roomTag     | String           | No       | room tag           |
+| roomTag     | Integer          | No       | room tag           |
 | userTags    | Array of Strings | No       | user tags          |
 | customTags  | Array of Strings | No       | custom tags        |
 
@@ -272,7 +272,7 @@ PUT /api/devices/<deviceId>/
             "value": 2
         }
     ],
-    "roomTag": "Kitchen",
+    "roomTag": 5,
     "userTags": [0, 1, ...],
     "customTags": [2, 3, ...]
 }
@@ -298,7 +298,7 @@ PUT /api/devices/<deviceId>/
     "unlocked": false,
     "uptimeTimeStamp: "...",
     "ipAddress": "...",
-    "roomTag": "Kitchen",
+    "roomTag": 5,
     "userTags": [
         {
             "tagId": 0,
@@ -380,10 +380,17 @@ Each element is the number of minutes the device was active in the period of an 
 
 ```
 [
-    50,
-    20,
-    30,
+    {
+        "deviceId": 0,
+        "usage": [
+            50,
+            20,
+            30,
+        ]
+    },
+    ...
 ]
+
 ```
 
 

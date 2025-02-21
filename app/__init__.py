@@ -45,7 +45,6 @@ def create_app():
     from . import models
     from .data import add_data_check
     from .routes import register_routes
-    from .websockets.events import register_socketio_handlers
 
     app = Flask(__name__)
 
@@ -56,6 +55,8 @@ def create_app():
     CORS(app)
     global socketio
     socketio = SocketIO(app)
+
+    from .websockets.events import register_socketio_handlers
 
     with app.app_context():
         if not os.path.exists(os.path.join(os.getcwd(), "migrations")):
