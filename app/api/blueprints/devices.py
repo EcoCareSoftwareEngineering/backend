@@ -308,64 +308,62 @@ def put_devices_update_handler(device_id: int):
     statement = select(IotDevices).where(IotDevices.deviceId == device_id)
 
     with db.engine.connect() as conn:
+        result = conn.execute(statement).first()
+
+    if result is None:
+        return jsonify({}), 500
+
+    (
+        deviceId,
+        name,
+        description,
+        state,
+        status,
+        faultStatus,
+        pinCode,
+        unlocked,
+        uptimeTimestamp,
+        ipAddress,
+    ) = result
+
+    statement = (
+        select(Tags.tagId, Tags.tagType)
+        .join(IotDevicesTags, Tags.tagId == IotDevicesTags.tagId)
+        .join(IotDevices, IotDevices.deviceId == IotDevicesTags.deviceId)
+        .where(IotDevices.deviceId == deviceId)
+    )
+
+    roomTag = None
+    userTags = []
+    customTags = []
+
+    with db.engine.connect() as conn:
         results = conn.execute(statement)
 
-    response = []
     for result in results:
-        (
-            deviceId,
-            name,
-            description,
-            state,
-            status,
-            faultStatus,
-            pinCode,
-            unlocked,
-            uptimeTimestamp,
-            ipAddress,
-        ) = result
+        (tag_id, tag_type) = result
+        if tag_type == TagType.Room:
+            roomTag = tag_id
+        if tag_type == TagType.User:
+            userTags.append(tag_id)
+        if tag_type == TagType.Custom:
+            customTags.append(tag_id)
 
-        # Get tags
-
-        statement = (
-            select(Tags.tagId, Tags.tagType)
-            .join(IotDevicesTags, Tags.tagId == IotDevicesTags.tagId)
-            .join(IotDevices, IotDevices.deviceId == IotDevicesTags.deviceId)
-            .where(IotDevices.deviceId == deviceId)
-        )
-
-        roomTag = None
-        userTags = []
-        customTags = []
-
-        with db.engine.connect() as conn:
-            results = conn.execute(statement)
-
-        for result in results:
-            (tag_id, tag_type) = result
-            if tag_type == TagType.Room:
-                roomTag = tag_id
-            if tag_type == TagType.User:
-                userTags.append(tag_id)
-            if tag_type == TagType.Custom:
-                customTags.append(tag_id)
-
-        entry = {
-            "deviceId": deviceId,
-            "name": name,
-            "description": description,
-            "state": state,
-            "status": "On" if status == IotDeviceStatus.On else "Off",
-            "faultStatus": "Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault",
-            "pinEnabled": pinCode != "None",
-            "unlocked": unlocked,
-            "uptimeTimestamp": uptimeTimestamp,
-            "ipAddress": ipAddress,
-            "roomTag": roomTag,
-            "userTags": userTags,
-            "customTags": customTags,
-        }
-        response.append(entry)
+    response = {
+        "deviceId": deviceId,
+        "name": name,
+        "description": description,
+        "state": state,
+        "status": "On" if status == IotDeviceStatus.On else "Off",
+        "faultStatus": "Ok" if faultStatus == IotDeviceFaultStatus.Ok else "Fault",
+        "pinEnabled": pinCode != "None",
+        "unlocked": unlocked,
+        "uptimeTimestamp": uptimeTimestamp,
+        "ipAddress": ipAddress,
+        "roomTag": roomTag,
+        "userTags": userTags,
+        "customTags": customTags,
+    }
 
     return jsonify(response), 200
 

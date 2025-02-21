@@ -125,9 +125,9 @@ def iot_devices_data():
             "state": row["state"],
             "status": row["status"],
             "faultStatus": row["faultStatus"],
-            "pinEnabled": row["pinCode"] != "",
-            "unlocked": bool(row["unlocked"]),
-            "uptimeTimestamp": row["uptimeTimestamp"],
+            "pinEnabled": row["pinCode"] != "None",
+            "unlocked": row["unlocked"] == "True",
+            "uptimeTimestamp": row["uptimeTimestamp"] or None,
             "ipAddress": row["ipAddress"],
         }
         data.append(entry)
