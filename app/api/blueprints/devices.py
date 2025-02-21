@@ -228,6 +228,8 @@ def post_devices_handler():
             "ipAddress": ipAddress,
         }
 
+        send_iot_device_update(deviceId)
+
         return jsonify(package), 200
     else:
         return "", 500
