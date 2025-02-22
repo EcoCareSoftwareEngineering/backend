@@ -15,8 +15,12 @@ The touchscreen frontend should use the following login credentials and make an 
 - Password: "touchscreenPassword"
 
 Remote account:
-- Username: "filip"
-- Password "ocaml"
+- Username: "remote"
+- Password "remote123"
+
+Testing account:
+- Username: "testing"
+- Password: "testing123"
 
 ## General Information
 
