@@ -5,6 +5,16 @@ import requests
 from app.models import TagType
 
 
+@pytest.fixture(scope="session")
+def login():
+    response = requests.post(
+        "http://127.0.0.1:5000/api/accounts/login/",
+        json={"username": "testing", "password": "testing123"},
+    ).json()
+
+    return response["token"]
+
+
 @pytest.fixture(autouse=True, scope="function")
 def config():
     response = requests.post("http://127.0.0.1:5000/dev/resetdb/").json()

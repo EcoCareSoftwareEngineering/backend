@@ -4,11 +4,13 @@ from jsonschema import *
 
 from ...models import *
 from ... import db
+from ...routes import check_authentication
 
 automations_blueprint = Blueprint("automations", __name__, url_prefix="/automations")
 
 
 @automations_blueprint.route("/", methods=["GET", "POST"])
+@check_authentication
 def automations_handler():
     if request.method == "GET":
         return get_automations_handler()
@@ -135,6 +137,7 @@ def post_automations_handler():
 
 
 @automations_blueprint.route("/<int:automation_id>/", methods=["PUT", "DELETE"])
+@check_authentication
 def automations_update_handler(automation_id: int):
     if request.method == "PUT":
         return put_automations_update_handler(automation_id)

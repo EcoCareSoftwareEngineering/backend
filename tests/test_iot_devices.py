@@ -1,11 +1,11 @@
 import copy
 import requests
 
-from app.models import TagType
 
-
-def test_get_iot_devices(iot_devices_data, iot_devices_tags_data, tags_data):
-    response = requests.get("http://127.0.0.1:5000/api/devices/").json()
+def test_get_iot_devices(login, iot_devices_data, iot_devices_tags_data, tags_data):
+    response = requests.get(
+        "http://127.0.0.1:5000/api/devices/", headers={"token": login}
+    ).json()
 
     for device in iot_devices_data:
         roomTag = None
@@ -34,7 +34,7 @@ def test_get_iot_devices(iot_devices_data, iot_devices_tags_data, tags_data):
     assert response == iot_devices_data
 
 
-def test_put_iot_devices(iot_devices_data, iot_devices_tags_data, tags_data):
+def test_put_iot_devices(login, iot_devices_data, iot_devices_tags_data, tags_data):
     for device in iot_devices_data:
         roomTag = None
         userTags = []
@@ -66,14 +66,18 @@ def test_put_iot_devices(iot_devices_data, iot_devices_tags_data, tags_data):
     update = {"state": [{"datatype": "integer", "fieldName": "hue", "value": 3}]}
     device["state"] = [{"datatype": "integer", "fieldName": "hue", "value": 3}]
 
-    response = requests.put("http://127.0.0.1:5000/api/devices/1/", json=update).json()
+    response = requests.put(
+        "http://127.0.0.1:5000/api/devices/1/", json=update, headers={"token": login}
+    ).json()
     assert response == device
 
-    response = requests.get("http://127.0.0.1:5000/api/devices/").json()
+    response = requests.get(
+        "http://127.0.0.1:5000/api/devices/", headers={"token": login}
+    ).json()
     assert response == devices
 
 
-def test_delete_iot_devices(iot_devices_data, iot_devices_tags_data, tags_data):
+def test_delete_iot_devices(login, iot_devices_data, iot_devices_tags_data, tags_data):
     for device in iot_devices_data:
         roomTag = None
         userTags = []
@@ -98,18 +102,22 @@ def test_delete_iot_devices(iot_devices_data, iot_devices_tags_data, tags_data):
         device["userTags"] = userTags
         device["customTags"] = customTags
 
-    response = requests.delete("http://127.0.0.1:5000/api/devices/1/")
+    response = requests.delete(
+        "http://127.0.0.1:5000/api/devices/1/", headers={"token": login}
+    )
     assert response.status_code == 200
 
     devices = iot_devices_data.copy()
 
     devices.pop(0)
 
-    response = requests.get("http://127.0.0.1:5000/api/devices/").json()
+    response = requests.get(
+        "http://127.0.0.1:5000/api/devices/", headers={"token": login}
+    ).json()
     assert response == devices
 
 
-def test_unlock_iot_device(iot_devices_data, iot_devices_tags_data, tags_data):
+def test_unlock_iot_device(login, iot_devices_data, iot_devices_tags_data, tags_data):
     for device in iot_devices_data:
         roomTag = None
         userTags = []
@@ -139,15 +147,19 @@ def test_unlock_iot_device(iot_devices_data, iot_devices_tags_data, tags_data):
     devices[1]["unlocked"] = True
 
     response = requests.post(
-        "http://127.0.0.1:5000/api/devices/unlock/2/", json={"pin": "1234"}
+        "http://127.0.0.1:5000/api/devices/unlock/2/",
+        json={"pin": "1234"},
+        headers={"token": login},
     )
     assert response.status_code == 200
 
-    response = requests.get("http://127.0.0.1:5000/api/devices/").json()
+    response = requests.get(
+        "http://127.0.0.1:5000/api/devices/", headers={"token": login}
+    ).json()
     assert response == devices
 
 
-def test_iot_devices_usage(iot_device_usage_data):
+def test_iot_devices_usage(login, iot_device_usage_data):
     usages = []
     ids = []
 
@@ -161,6 +173,7 @@ def test_iot_devices_usage(iot_device_usage_data):
                 entry["usage"].append(usage["usage"])
 
     response = requests.get(
-        "http://127.0.0.1:5000/api/devices/usage/?rangeStart=2025-01-01&rangeEnd=2025-02-01"
+        "http://127.0.0.1:5000/api/devices/usage/?rangeStart=2025-01-01&rangeEnd=2025-02-01",
+        headers={"token": login},
     ).json()
     assert response == usages

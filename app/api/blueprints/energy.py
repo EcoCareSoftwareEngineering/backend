@@ -4,11 +4,13 @@ from sqlalchemy import and_
 from datetime import datetime
 from ...models import *
 from ... import db
+from ...routes import check_authentication
 
 energy_blueprint = Blueprint("energy", __name__, url_prefix="/energy")
 
 
 @energy_blueprint.route("/", methods=["GET"])
+@check_authentication
 def energy_handler():
     if request.method == "GET":
         return get_energy_usage()
@@ -51,7 +53,6 @@ def get_energy_usage():
 
     energy_usage = [record.energyUse for record in results]
     energy_generation = [record.energyGeneration for record in results]
-    
 
     response = {
         "energyUsage": energy_usage,

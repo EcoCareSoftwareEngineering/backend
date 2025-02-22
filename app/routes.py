@@ -16,7 +16,7 @@ def register_routes(app):
     app.register_blueprint(development_blueprint)
 
 
-def check_token(function):
+def check_authentication(function):
     @wraps(function)
     def check_token_helper(*args, **kwargs):
         token = request.headers.get("token")

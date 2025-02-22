@@ -4,6 +4,7 @@ from jsonschema import *
 
 from ...models import *
 from ... import db
+from ...routes import check_authentication
 
 goals_blueprint = Blueprint("goals", __name__, url_prefix="/goals")
 
@@ -11,6 +12,7 @@ goals_blueprint = Blueprint("goals", __name__, url_prefix="/goals")
 
 
 @goals_blueprint.route("/", methods=["GET", "POST"])
+@check_authentication
 def goals_handler():
     if request.method == "GET":
         return get_goals_handler()
@@ -134,6 +136,7 @@ def post_goal_handler():
 
 
 @goals_blueprint.route("/<int:goal_id>/", methods=["PUT", "DELETE"])
+@check_authentication
 def goals_update_handler(goal_id: int):
     if request.method == "PUT":
         return put_goal_update_handler(goal_id)

@@ -1,10 +1,9 @@
 from flask import Blueprint, jsonify, request
-from flask_socketio import emit
 from sqlalchemy import select, insert, update, delete
 
 from ...models import *
-from ... import db, socketio, unconnected_iot_devices
-from ...routes import check_token
+from ... import db, unconnected_iot_devices
+from ...routes import check_authentication
 from ...websockets.events import send_iot_device_update
 from jsonschema import *
 
@@ -12,6 +11,7 @@ devices_blueprint = Blueprint("devices", __name__, url_prefix="/devices")
 
 
 @devices_blueprint.route("/", methods=["GET", "POST"])
+@check_authentication
 def devices_handler():
     if request.method == "GET":
         return get_devices_handler()
@@ -236,11 +236,13 @@ def post_devices_handler():
 
 
 @devices_blueprint.route("/new/", methods=["GET"])
+@check_authentication
 def devices_new_handler():
     return jsonify(unconnected_iot_devices), 200
 
 
 @devices_blueprint.route("/<int:device_id>/", methods=["PUT", "DELETE"])
+@check_authentication
 def devices_update_handler(device_id: int):
     if request.method == "PUT":
         return put_devices_update_handler(device_id)
@@ -396,6 +398,7 @@ def delete_devices_update_handler(device_id: int):
 # curl -X POST -H "Content-Type: application/json" -d '{"pin": "1234"}' http://127.0.0.1:5000/api/devices/unlock/6/
 # ^ change entry 6 in iot_devices.csv to have a pincode and unlocked = false before using this
 @devices_blueprint.route("/unlock/<int:device_id>/", methods=["POST"])
+@check_authentication
 def devices_unlock_handler(device_id: int):
     # check if pinenabled
     jsonresult = request.json
@@ -446,6 +449,7 @@ def devices_unlock_handler(device_id: int):
 
 
 @devices_blueprint.route("/usage/", methods=["GET"])
+@check_authentication
 def devices_usage_handler():
     start_date = request.args.get("rangeStart")
     end_date = request.args.get("rangeEnd")
