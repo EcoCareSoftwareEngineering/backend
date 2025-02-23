@@ -13,18 +13,26 @@ def misc_handler():
         return get_misc_handler()
     elif request.method == "POST":
         return post_misc_handler()
-    return jsonify({"endpoint": "GET_misc_handler"}), 500
+    return jsonify({"endpoint": "GET_misc_handler"}), 600
 
 
 def get_misc_handler():
-    return jsonify({"pinEnabled": local_device_config["pinCode"] != ""}), 200
+    return (
+        jsonify(
+            {
+                "pinEnabled": local_device_config["pinCode"] != "",
+                "locked": local_device_config["locked"],
+            }
+        ),
+        200,
+    )
 
 
 def post_misc_handler():
     json = request.json
 
     if json is None:
-        return jsonify({}), 500
+        return jsonify({}), 600
 
     if json["pinCode"] == local_device_config["pinCode"]:
         local_device_config["locked"] = False
