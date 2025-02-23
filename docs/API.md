@@ -8,7 +8,7 @@ For more information on data stored in the database see [models.py](../app/model
 
 ## Authentication
 
-To use the API all requests must be accompanied with an Authentication token in request headers. The token is aquired by sending a request to `.../accoutns/login/` with valid login credentials. The API will respond with a token to be used in future requests. `.../accounts/.../` are only endpoints that do not require a token for obvious reasons.
+To use the API all requests must be accompanied with an Authentication token in request headers. The token is acquired by sending a request to `.../accounts/login/` with valid login credentials. The API will respond with a token to be used in future requests. `.../accounts/.../` are only endpoints that do not require a token for obvious reasons. To use the other endpoints send "token": "..." as a header in all requests.
 
 The touchscreen frontend should use the following login credentials and make an automatic call upon startup:
 - Username: "touchscreen"
@@ -26,7 +26,7 @@ All dates used by the API are in the format: "yyyy-mm-dd", where "yyyy" is the 4
 
 If a time is required it is in the format: "hh:mm", where "hh" is the 2 digit hour in a 24 clock and "mm" is the 2 digit minutes.
 
-If a dateTime is requred it is in the format: "yyyy-mm-dd hh:mm", see above for information.
+If a dateTime is required it is in the format: "yyyy-mm-dd hh:mm", see above for information.
 
 Overview:
 - General
@@ -54,7 +54,7 @@ Overview:
   - [`GET /energy/`](#get-energy-usage) - Get energy records (including querying)
 - Accounts
   - [`POST /accounts/login`](#login) - Log into an account
-  - [`POST /accounts/signup`](#sign-up-for-an-account) - Sign up for an accout
+  - [`POST /accounts/signup`](#sign-up-for-an-account) - Sign up for an account
 - Tags
   - [`GET /tags/`](#get-all-tags) - Retrieve all tags
   - [`POST /tags/`](#add-a-new-tag) - Create a new tag
@@ -119,12 +119,12 @@ Fetches all IoT devices connected to the smart home.
 | name        | String  | No       | Search for device starting with name | No search |
 | status      | String  | No       | "On" \| "Off"                        | Both      |
 | faultStatus | String  | No       | "Ok" \| "Fault"                      | Both      |
-| roomTag     | String  | No       | Tag name to search for               | No search |
-| userTag     | String  | No       | Tag name to search for               | No search |
-| customTag   | String  | No       | Tag name to search for               | No search |
+| roomTag     | Integer | No       | Tag name to search for               | No search |
+| userTag     | Integer | No       | Tag name to search for               | No search |
+| customTag   | Integer | No       | Tag name to search for               | No search |
 
 ```
-GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=...&userTag=...&customTag=...
+GET /api/devices/?deviceId=0&name=SmartLight&status=Ok&roomTag=1&userTag=2&customTag=...
 ```
 
 #### Response
@@ -256,7 +256,7 @@ Updates the IoT Device's details/state that correspond to `deviceID`, only send 
 | name        | String           | No       | device name        |
 | description | String           | No       | device description |
 | state       | JSON             | No       | device state       |
-| roomTag     | String           | No       | room tag           |
+| roomTag     | Integer          | No       | room tag           |
 | userTags    | Array of Strings | No       | user tags          |
 | customTags  | Array of Strings | No       | custom tags        |
 
@@ -272,7 +272,7 @@ PUT /api/devices/<deviceId>/
             "value": 2
         }
     ],
-    "roomTag": "Kitchen",
+    "roomTag": 5,
     "userTags": [0, 1, ...],
     "customTags": [2, 3, ...]
 }
@@ -298,7 +298,7 @@ PUT /api/devices/<deviceId>/
     "unlocked": false,
     "uptimeTimeStamp: "...",
     "ipAddress": "...",
-    "roomTag": "Kitchen",
+    "roomTag": 5,
     "userTags": [
         {
             "tagId": 0,
@@ -337,7 +337,7 @@ Status 500 for failure
 
 ### Unlock an IoT device
 
-If an IoT deivce has a pin code setup, `pinEnabled` will be true, use this endpoint to unlock the deivce. Once unlocked the device is unlocked until server is turned off. Future version of prototype will have a timeout feature.
+If an IoT device has a pin code setup, `pinEnabled` will be true, use this endpoint to unlock the device. Once unlocked the device is unlocked until server is turned off. Future version of prototype will have a timeout feature.
 
 #### Request 
 
@@ -380,10 +380,17 @@ Each element is the number of minutes the device was active in the period of an 
 
 ```
 [
-    50,
-    20,
-    30,
+    {
+        "deviceId": 0,
+        "usage": [
+            50,
+            20,
+            30,
+        ]
+    },
+    ...
 ]
+
 ```
 
 

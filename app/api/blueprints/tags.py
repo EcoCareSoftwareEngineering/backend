@@ -19,6 +19,7 @@ def tags_handler():
 
 # GET - retrieve tags from the db
 def get_tags_handler():
+    # GET /tags?tagType=category
     tag_type = request.args.get("tagType")
 
     # If tagType is provided, validate it
@@ -32,14 +33,17 @@ def get_tags_handler():
     else:
         statement = select(Tags)  # Fetch all tags if no filter is applied
 
-    with db.engine.connect() as conn:
-        results = conn.execute(statement)
+    try:
+        with db.engine.connect() as conn:
+            results = conn.execute(statement).fetchall()
 
-    response = [
-        {"tagId": tag.tagId, "name": tag.name, "tagType": tag.tagType.name}
-        for tag in results
-    ]
-    return jsonify(response), 200
+        response = [
+            {"tagId": tag.tagId, "name": tag.name, "tagType": tag.tagType.name}
+            for tag in results
+        ]
+        return jsonify(response), 200
+    except Exception as e:
+        return jsonify({"Error": f"An error occured while fetching tag: {str(e)}"}),500
 
 
 # POST - create a new tag
@@ -57,29 +61,20 @@ def post_tags_handler():
     except KeyError:
         return jsonify({"Error": "Invalid tagType value"}), 400
 
-    # Create and save new tag
-    new_tag = Tags(name=data["name"], tagType=tag_type)
-
+    # Prepares sql insert statement to add tags
+    statement = insert(Tags).values(name=data["name"], tagType=tag_type)
     try:
-        db.session.add(new_tag)
-        db.session.commit()
-        return (
-            jsonify(
-                {
-                    "message": "Tag created successfully",
-                    "tagId": new_tag.tagId,
-                    "name": new_tag.name,
-                    "tagType": new_tag.tagType.name,
-                }
-            ),
-            201,
-        )
+        with db.engine.connect() as conn:
+            result = conn.execute(statement)
+            conn.commit()
+            
+            #Fetch the inserted tag
+            tag_id = result.inserted_primary_key[0] if result.inserted_primary_key else None
+        return jsonify({"message": "Tag created successfully", "tagId": tag_id}), 201
+        
     except Exception as e:
-        db.session.rollback()  # Rollback in case of any errors
-        return (
-            jsonify({"Error": f"An error occurred while creating the tag: {str(e)}"}),
-            500,
-        )
+        return jsonify({"Error": f"An error occurred while creating the tag: {str(e)}"}), 500
+
 
 # route supports GET & DELETE for tag_id
 @tags_blueprint.route("/<int:tag_id>", methods=["GET", "DELETE"])
@@ -90,24 +85,35 @@ def tag_handle(tag_id):
         return delete_tag_handler(tag_id)
 # GET single tag
 def get_single_tag(tag_id):
-    tag = db.session.get(Tags, tag_id)
-    if not tag:
-        return jsonify({f"Error": f"Tag with id {tag_id} not found"}), 404
-    return jsonify({"tagId": tag.tagId, "name": tag.name, "tagType": tag.tagType.name}), 200
+    statement = select(Tags).where(Tags.tagId == tag_id)
+    
+    try:
+        with db.engine.connect() as conn:
+            result = conn.execute(statement).fetchone()
+            if result is None:
+                return jsonify({"Error": f"Tag with id {tag_id} not found"}), 404
+            
+            return jsonify({"tagId": result.tagId, "name": result.name, "tagType": result.tagType.name}), 200
+    except Exception as e:
+        return jsonify({"Error": f"An error occured while fetching tag: {str(e)}"}), 500
+    
     
 # DELETE - delete tag    
 def delete_tag_handler(tag_id):
-    tag = db.session.get(Tags, tag_id)
-    if not tag:
-        return jsonify({"Error": f"Tag with id {tag_id} not found"}), 404
-
+    statement = select(Tags).where(Tags.tagId == tag_id)
+    
     try:
-        db.session.delete(tag)
-        db.session.commit()
-        return jsonify({"message": f"Tag with id {tag_id} deleted successfully"}), 200
+        with db.engine.connect() as conn:
+            result = conn.execute(statement).fetchone()
+            if result is None:
+                return jsonify({"Error": f"Tag with id {tag_id} not found"}), 404
+            
+            delete_statement = delete(Tags).where(Tags.tagId == tag_id)
+            conn.execute(delete_statement)
+            conn.commit()
+            
+        return jsonify({"message": f"Tag with id: {tag_id} deleted succesfuly"}), 200
     except Exception as e:
-        db.session.rollback()
-        return (
-            jsonify({"Error": f"An error occured while deleting the tag: {str(e)}"}),
-            500,
-        )
+        return jsonify({"Error": f"An error occured while deleting the tag: {str(e)}"}), 500
+            
+ 

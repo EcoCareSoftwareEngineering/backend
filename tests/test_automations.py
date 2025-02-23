@@ -13,7 +13,7 @@ def test_post_automations(automations_data):
     newAutomation = {
         "deviceId": 3,
         "dateTime": "2025-02-10 23:20:30",
-        "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}],
+        "newState": [{"fieldName": "hue", "datatype": "integer", "value": 2}],
     }
     postResponse = requests.post(url, json=newAutomation)
     # now that we've put our new automation in, let's GET the automations
@@ -25,7 +25,7 @@ def test_post_automations(automations_data):
             "automationId": 3,
             "deviceId": 3,
             "dateTime": "Mon, 10 Feb 2025 23:20:30 GMT",
-            "newState": [{"fieldName": "hue", "dataType": "integer", "value": 2}],
+            "newState": [{"fieldName": "hue", "datatype": "integer", "value": 2}],
         }
     )
     assert response.json() == postData
@@ -35,7 +35,7 @@ def test_put_automations(automations_data):
     putURL = url + "2/"
     updateAutomation = {
         "dateTime": "2025-02-17 22:20:50",
-        "newState": [{"fieldName": "huey", "dataType": "integer", "value": 7}],
+        "newState": [{"fieldName": "huey", "datatype": "integer", "value": 7}],
     }
     # we update the second entry
     putResponse = requests.put(putURL, json=updateAutomation)
@@ -46,7 +46,7 @@ def test_put_automations(automations_data):
         "automationId": 2,
         "deviceId": 2,
         "dateTime": "Mon, 17 Feb 2025 22:20:50 GMT",
-        "newState": [{"fieldName": "huey", "dataType": "integer", "value": 7}],
+        "newState": [{"fieldName": "huey", "datatype": "integer", "value": 7}],
     }
     assert response.json() == putData
 
