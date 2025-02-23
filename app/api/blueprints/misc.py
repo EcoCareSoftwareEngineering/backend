@@ -37,6 +37,6 @@ def post_misc_handler():
     if json["pinCode"] == local_device_config["pinCode"]:
         local_device_config["locked"] = False
 
-        return jsonify({local_device_config["locked"]}), 200
+        return jsonify({"locked": local_device_config["locked"]}), 200
 
-    return jsonify({local_device_config["locked"]}), 200
+    return jsonify({"locked": local_device_config["locked"]}), 200
