@@ -8,7 +8,7 @@ For more information on data stored in the database see [models.py](../app/model
 
 ## Authentication
 
-To use the API all requests must be accompanied with an Authentication token in request headers. The token is aquired by sending a request to `.../accoutns/login/` with valid login credentials. The API will respond with a token to be used in future requests. `.../accounts/.../` are only endpoints that do not require a token for obvious reasons. To use the other endpoints send "token": "..." as a header in all requests.
+To use the API all requests must be accompanied with an Authentication token in request headers. The token is acquired by sending a request to `.../accounts/login/` with valid login credentials. The API will respond with a token to be used in future requests. `.../accounts/.../` are only endpoints that do not require a token for obvious reasons. To use the other endpoints send "token": "..." as a header in all requests.
 
 The touchscreen frontend should use the following login credentials and make an automatic call upon startup:
 - Username: "touchscreen"
@@ -26,7 +26,7 @@ All dates used by the API are in the format: "yyyy-mm-dd", where "yyyy" is the 4
 
 If a time is required it is in the format: "hh:mm", where "hh" is the 2 digit hour in a 24 clock and "mm" is the 2 digit minutes.
 
-If a dateTime is requred it is in the format: "yyyy-mm-dd hh:mm", see above for information.
+If a dateTime is required it is in the format: "yyyy-mm-dd hh:mm", see above for information.
 
 Overview:
 - General
@@ -54,7 +54,7 @@ Overview:
   - [`GET /energy/`](#get-energy-usage) - Get energy records (including querying)
 - Accounts
   - [`POST /accounts/login`](#login) - Log into an account
-  - [`POST /accounts/signup`](#sign-up-for-an-account) - Sign up for an accout
+  - [`POST /accounts/signup`](#sign-up-for-an-account) - Sign up for an account
 - Tags
   - [`GET /tags/`](#get-all-tags) - Retrieve all tags
   - [`POST /tags/`](#add-a-new-tag) - Create a new tag
@@ -337,7 +337,7 @@ Status 500 for failure
 
 ### Unlock an IoT device
 
-If an IoT deivce has a pin code setup, `pinEnabled` will be true, use this endpoint to unlock the deivce. Once unlocked the device is unlocked until server is turned off. Future version of prototype will have a timeout feature.
+If an IoT device has a pin code setup, `pinEnabled` will be true, use this endpoint to unlock the device. Once unlocked the device is unlocked until server is turned off. Future version of prototype will have a timeout feature.
 
 #### Request 
 
