@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 import json
 import pytest
 import requests
@@ -51,10 +52,10 @@ def energy_records_data():
 
     data = []
     for row in rows:
-        row["energyRecordId"] = int(row["energyRecordId"])
-        row["hour"] = int(row["hour"])
+        del row["energyRecordId"]
         row["energyUse"] = float(row["energyUse"])
         row["energyGeneration"] = float(row["energyGeneration"])
+        row["datetime"] = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
         data.append({key: value for key, value in row.items() if value != ""})
 
     return data
@@ -91,8 +92,8 @@ def iot_device_usage_data():
     data = []
     for row in rows:
         row["deviceUsageId"] = int(row["deviceUsageId"])
-        row["hour"] = int(row["hour"])
         row["usage"] = int(row["usage"])
+        row["datetime"] = datetime.strptime(row["datetime"], "%Y-%m-%d %H:%M:%S")
         row["deviceId"] = int(row["deviceId"]) if row["deviceId"] else None
         data.append({key: value for key, value in row.items() if value != ""})
 

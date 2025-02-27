@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime
 import requests
 
 
@@ -170,10 +171,22 @@ def test_iot_devices_usage(login, iot_device_usage_data):
 
         for entry in usages:
             if entry["deviceId"] == usage["deviceId"]:
-                entry["usage"].append(usage["usage"])
+                entry["usage"].append(
+                    {
+                        "datetime": usage["datetime"],
+                        "usage": usage["usage"],
+                    }
+                )
 
     response = requests.get(
         "http://127.0.0.1:5000/api/devices/usage/?rangeStart=2025-01-01&rangeEnd=2025-02-01",
         headers={"token": login},
     ).json()
+
+    for record in response:
+        for entry in record["usage"]:
+            entry["datetime"] = datetime.strptime(
+                entry["datetime"], "%a, %d %b %Y %H:%M:%S GMT"
+            )
+
     assert response == usages

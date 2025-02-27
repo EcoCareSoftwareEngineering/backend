@@ -62,7 +62,7 @@ def get_energy_usage():
         response.append(
             {
                 "datetime": date_time,
-                "energyUsage": energy_usage,
+                "energyUse": energy_usage,
                 "energyGeneration": energy_generation,
             }
         )
