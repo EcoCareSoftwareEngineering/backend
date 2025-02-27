@@ -181,22 +181,22 @@ iot_device_usage = [
 
 with open("data/energy_records.csv", "w") as file:
     id = 1
-    file.write("energyRecordId,date,hour,energyUse,energyGeneration\n")
+    file.write("energyRecordId,datetime,energyUse,energyGeneration\n")
     for j in range(7):
         for i in range(24):
             file.write(
-                f"{id},{dates[j]},{i},{energy_usage_data[i]},{energy_generation_data[i]}\n"
+                f"{id},{dates[j]} {i:02}:00:00,{energy_usage_data[i]},{energy_generation_data[i]}\n"
             )
             id += 1
 
 
 with open("data/iot_device_usage.csv", "w") as file:
     id = 1
-    file.write("deviceUsageId,date,hour,usage,deviceId\n")
+    file.write("deviceUsageId,datetime,usage,deviceId\n")
     for date in range(7):
         for hour in range(24):
             for device_id in range(1, 8):
                 file.write(
-                    f"{id},{dates[date]},{hour},{iot_device_usage[device_id-1][hour]},{device_id}\n"
+                    f"{id},{dates[date]} {hour:02}:00:00,{iot_device_usage[device_id-1][hour]},{device_id}\n"
                 )
                 id += 1

@@ -105,8 +105,7 @@ class IotDeviceUsage(db.Model):
     """
 
     deviceUsageId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    date = db.Column(db.Date(), nullable=False)
-    hour = db.Column(db.Integer(), nullable=False)
+    datetime = db.Column(db.DateTime(), nullable=False)
     usage = db.Column(db.Integer(), nullable=False)
     deviceId = db.Column(
         db.Integer(), db.ForeignKey("iot_devices.deviceId"), nullable=True
@@ -160,8 +159,7 @@ class EnergyRecords(db.Model):
     """
 
     energyRecordId = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    date = db.Column(db.Date(), nullable=False)
-    hour = db.Column(db.Integer(), nullable=False)
+    datetime = db.Column(db.DateTime(), nullable=False)
     energyUse = db.Column(db.Float(), nullable=False)
     energyGeneration = db.Column(db.Float(), nullable=False)
 

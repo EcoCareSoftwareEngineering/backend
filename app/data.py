@@ -111,7 +111,6 @@ def add_data():
         device_usage_data = []
         for row in device_usage_rows:
             row["deviceUsageId"] = int(row["deviceUsageId"])
-            row["hour"] = int(row["hour"])
             row["usage"] = int(row["usage"])
             row["deviceId"] = int(row["deviceId"]) if row["deviceId"] else None
             device_usage_data.append(
@@ -173,8 +172,6 @@ def add_data():
         energy_record_data = []
         for row in energy_record_rows:
             row["energyRecordId"] = int(row["energyRecordId"])
-            row["date"] = datetime.strptime(row["date"], "%Y-%m-%d")
-            row["hour"] = int(row["hour"])
             row["energyUse"] = float(row["energyUse"])
             row["energyGeneration"] = float(row["energyGeneration"])
             energy_record_data.append(

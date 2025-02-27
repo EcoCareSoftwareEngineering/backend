@@ -387,9 +387,11 @@ Each element is the number of minutes the device was active in the period of an 
     {
         "deviceId": 0,
         "usage": [
-            50,
-            20,
-            30,
+            {"datetime": ..., "usage": 40},
+            {"datetime": ..., "usage": 20},
+            {"datetime": ..., "usage": 60},
+            {"datetime": ..., "usage": 20},
+            ...
         ]
     },
     ...
@@ -685,14 +687,13 @@ GET /api/?startDate=...&endDate=...
 Each element is the amount of energy used/generated in the period of an hour. Each day has 24 entries corresponding to the 24 hour periods in a day. The array starts from the first day in the range, then second, etc.
 
 ```
-{
-    energyUsage: [
-        20, 30, 40, ...
-    ]
-    energyGeneration: [
-        20, 10, 5, ...
-    ]
-}
+[
+    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
+]
 ```
 
 ## Accounts

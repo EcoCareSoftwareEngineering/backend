@@ -458,13 +458,13 @@ def devices_usage_handler():
     if start_date is None or end_date is None:
         return jsonify({}), 500
 
-    statement = select(IotDeviceUsage.deviceId, IotDeviceUsage.usage)
+    statement = select(IotDeviceUsage)
 
     if deviceId is not None:
         statement = statement.where(IotDeviceUsage.deviceId == deviceId)
 
-    statement = statement.where(IotDeviceUsage.date >= start_date)
-    statement = statement.where(IotDeviceUsage.date <= end_date)
+    statement = statement.where(IotDeviceUsage.datetime >= start_date)
+    statement = statement.where(IotDeviceUsage.datetime <= end_date)
 
     with db.engine.connect() as conn:
         results = conn.execute(statement)
@@ -475,12 +475,14 @@ def devices_usage_handler():
     response = []
     ids = []
     for result in results:
-        (device_id, usage) = result
+        (device_id, date_time, usage, device_id) = result
 
         if device_id not in ids:
             ids.append(device_id)
             response.append({"deviceId": device_id, "usage": []})
 
-        response[ids.index(device_id)]["usage"].append(usage)
+        response[ids.index(device_id)]["usage"].append(
+            {"datetime": date_time, "usage": usage}
+        )
 
     return jsonify(response), 200

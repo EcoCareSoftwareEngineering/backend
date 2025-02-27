@@ -41,8 +41,12 @@ def get_energy_usage():
     # Query the database and order results by date then hour
     statement = (
         select(EnergyRecords)
-        .where(and_(EnergyRecords.date >= start_date, EnergyRecords.date <= end_date))
-        .order_by(EnergyRecords.date, EnergyRecords.hour)
+        .where(
+            and_(
+                EnergyRecords.datetime >= start_date, EnergyRecords.datetime <= end_date
+            )
+        )
+        .order_by(EnergyRecords.datetime)
     )
 
     with db.engine.connect() as conn:
@@ -51,13 +55,17 @@ def get_energy_usage():
     if not results:
         return jsonify({"Error": "No records found for the given date range"}), 404
 
-    energy_usage = [record.energyUse for record in results]
-    energy_generation = [record.energyGeneration for record in results]
+    response = []
 
-    response = {
-        "energyUsage": energy_usage,
-        "energyGeneration": energy_generation,
-    }
+    for result in results:
+        (_, date_time, energy_usage, energy_generation) = result
+        response.append(
+            {
+                "datetime": date_time,
+                "energyUsage": energy_usage,
+                "energyGeneration": energy_generation,
+            }
+        )
 
     return jsonify(response), 200
 
