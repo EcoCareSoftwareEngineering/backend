@@ -688,11 +688,11 @@ Each element is the amount of energy used/generated in the period of an hour. Ea
 
 ```
 [
-    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
-    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
-    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
-    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
-    {"datetime": ..., "energyUsage": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUse": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUse": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUse": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUse": 40, "energyGeneration": 20},
+    {"datetime": ..., "energyUse": 40, "energyGeneration": 20},
 ]
 ```
 
