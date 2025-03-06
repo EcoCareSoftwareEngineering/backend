@@ -151,7 +151,7 @@ def add_data():
         energy_saving_goal_data = []
         for row in energy_saving_goal_rows:
             row["goalId"] = int(row["goalId"])
-            row["target"] = float(row["goalId"])
+            row["target"] = float(row["target"])
             row["progress"] = float(row["progress"])
             row["complete"] = row["complete"] == "True"
             energy_saving_goal_data.append(
