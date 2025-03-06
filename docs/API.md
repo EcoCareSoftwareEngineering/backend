@@ -560,7 +560,7 @@ GET /api/goals/?completed=true
 
 #### Response
 
-Progress is a percentage
+Progress is a unit compared to the target, not a percentage
 
 ```
 [
