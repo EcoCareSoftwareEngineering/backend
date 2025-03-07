@@ -80,7 +80,8 @@ GET /api/unlock/
 
 ```
 {
-    "pinEnabled": false
+    "pinEnabled": false,
+    "locked": false,
 }
 ```
 
