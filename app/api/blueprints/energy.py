@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.sql import func
 from sqlalchemy import and_
 from datetime import datetime
 from ...models import *
@@ -22,6 +23,7 @@ def get_energy_usage():
     # Query parameters
     start_date = request.args.get("startDate")
     end_date = request.args.get("endDate")
+    time_period = request.args.get("time_period", "hourly")
 
     # Validate required fields
     if not start_date or not end_date:
@@ -38,15 +40,33 @@ def get_energy_usage():
     if start_date > end_date:
         return jsonify({"Error": "startDate cannot be after endDate"}), 400
 
-    # Query the database and order results by date then hour
+    # Validate time_period
+    allowed_periods = {"hourly", "daily", "weekly", "monthly"}
+    if time_period not in allowed_periods:
+        return jsonify({"Error": f"Invalid time_period. Must be one of {allowed_periods}"}), 400
+
+    # Define grouping logic for the time period
+    if time_period == "hourly":
+        time_group = func.date_format(EnergyRecords.datetime, "%Y-%m-%d %H:00:00")
+    elif time_period == "daily":
+        time_group = func.date_format(EnergyRecords.datetime, "%Y-%m-%d")
+    elif time_period == "weekly":
+        time_group = func.yearweek(EnergyRecords.datetime, 3)
+    elif time_period == "monthly":
+        time_group = func.date_format(EnergyRecords.datetime, "%Y-%m")
+
+    # Query database
     statement = (
-        select(EnergyRecords)
-        .where(
-            and_(
-                EnergyRecords.datetime >= start_date, EnergyRecords.datetime <= end_date
-            )
+        select(
+            time_group.label("time_period"),
+            func.sum(EnergyRecords.energyUse).label("energy_use"),
+            func.sum(EnergyRecords.energyGeneration).label("energy_generation"),
         )
-        .order_by(EnergyRecords.datetime)
+        .where(
+            and_(EnergyRecords.datetime >= start_date, EnergyRecords.datetime <= end_date)
+        )
+        .group_by("time_period")
+        .order_by("time_period")
     )
 
     with db.engine.connect() as conn:
@@ -58,12 +78,12 @@ def get_energy_usage():
     response = []
 
     for result in results:
-        (_, date_time, energy_usage, energy_generation) = result
+        ( time_period, energy_usage, energy_generation) = result
         response.append(
             {
-                "datetime": date_time,
-                "energyUse": energy_usage,
-                "energyGeneration": energy_generation,
+                "datetime": time_period,
+                "energyUse": round(energy_usage, 3),
+                "energyGeneration": round(energy_generation, 3),
             }
         )
 
