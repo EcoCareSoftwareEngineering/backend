@@ -261,6 +261,7 @@ Updates the IoT Device's details/state that correspond to `deviceID`, only send 
 | name        | String           | No       | device name        |
 | description | String           | No       | device description |
 | state       | JSON             | No       | device state       |
+| status      | String           | No       | device power       |
 | roomTag     | Integer          | No       | room tag           |
 | userTags    | Array of Strings | No       | user tags          |
 | customTags  | Array of Strings | No       | custom tags        |
@@ -277,6 +278,7 @@ PUT /api/devices/<deviceId>/
             "value": 2
         }
     ],
+    "status": "On",
     "roomTag": 5,
     "userTags": [0, 1, ...],
     "customTags": [2, 3, ...]
@@ -297,7 +299,7 @@ PUT /api/devices/<deviceId>/
             "value": 2
         }
     ],
-    "status": ("On" | "Off"),
+    "status": "On",
     "faultStatus": ("Ok" | "Fault"),
     "pinEnabled": true,
     "unlocked": false,
@@ -674,18 +676,19 @@ Status 500 for failure
 
 #### Request 
 
-| Parameter | Type   | Required | Description                |
-| --------- | ------ | -------- | -------------------------- |
-| startDate | String | Yes      | Start date of search range |
-| endDate   | String | Yes      | End date of search range   |
+| Parameter  | Type   | Required | Description                | Default  |
+| ---------- | ------ | -------- | -------------------------- | -------- |
+| startDate  | String | Yes      | Start date of search range |          |
+| endDate    | String | Yes      | End date of search range   |          |
+| timePeriod | String | No       | Frequency of data items    | hourly   |
 
 ```
-GET /api/?startDate=...&endDate=...
+GET /api/?startDate=...&endDate=...&timePeriod=...
 ```
 
 #### Response
 
-Each element is the amount of energy used/generated in the period of an hour. Each day has 24 entries corresponding to the 24 hour periods in a day. The array starts from the first day in the range, then second, etc.
+Each element represents the amount of energy used or generated within the specified time period (hourly, daily, weekly, or monthly). For hourly data, each day contains 24 entries, corresponding to each hour of the day. The array is structured sequentially, starting from the first day in the range, followed by the second, and so on.
 
 ```
 [
