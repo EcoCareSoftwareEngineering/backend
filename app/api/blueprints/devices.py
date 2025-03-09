@@ -250,7 +250,6 @@ def devices_update_handler(device_id: int):
         return delete_devices_update_handler(device_id)
     return jsonify({"Error": "Invalid"}), 500
 
-
 def put_devices_update_handler(device_id: int):
     json = request.json
     if json is None:
@@ -264,6 +263,9 @@ def put_devices_update_handler(device_id: int):
         values["description"] = json["description"]
     if "state" in json:
         values["state"] = json["state"]
+    if "status" in json:
+        status_value = IotDeviceStatus.On if json["status"] == "On" else IotDeviceStatus.Off
+        values["status"] = status_value
 
     update_statement = (
         update(IotDevices).where(IotDevices.deviceId == device_id).values(**values)
