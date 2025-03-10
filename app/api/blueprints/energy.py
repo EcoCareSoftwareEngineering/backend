@@ -26,7 +26,6 @@ def get_energy_usage():
     try:
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
-        # Set end_datetime to the end of the day
         end_datetime = end_datetime.replace(hour=0, minute=0, second=0)
     except ValueError:
         return jsonify({"Error": "Invalid date format. Use YYYY-MM-DD"}), 400
@@ -40,11 +39,10 @@ def get_energy_usage():
     if time_period not in allowed_periods:
         return jsonify({"Error": f"Invalid time_period. Must be one of {allowed_periods}"}), 400
 
-    # Define grouping logic for the time period
+    # Define grouping logic and generate all time periods
     all_timestamps = []
     format_string = ""
-    
-    # Generate all time periods 
+
     if time_period == "hourly":
         time_group = func.date_format(EnergyRecords.datetime, "%Y-%m-%d %H:00:00")
         format_string = "%Y-%m-%d %H:00:00"
@@ -113,7 +111,6 @@ def get_energy_usage():
             "energyGeneration": round(energy_generation, 3) if energy_generation is not None else None
         }
 
-    # Create the complete response with nulls for missing timestamps
     response = []
     for timestamp in all_timestamps:
         if timestamp in res_dict:
