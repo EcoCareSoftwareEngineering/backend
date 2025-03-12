@@ -290,11 +290,11 @@ def put_devices_update_handler(device_id: int):
     elif room_tag is not None:
         rows.append({"deviceId": device_id, "tagId": int(room_tag)})
     if "userTag" in json:
-        rows.append(
+        rows.extend(
             {"deviceId": device_id, "tagId": int(tag_id)} for tag_id in json["userTag"]
         )
     if "customTag" in json:
-        rows.append(
+        rows.extend(
             {"deviceId": device_id, "tagId": int(tag_id)}
             for tag_id in json["customTag"]
         )
