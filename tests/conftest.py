@@ -71,7 +71,7 @@ def energy_saving_goals_data():
     data = []
     for row in rows:
         row["goalId"] = int(row["goalId"])
-        row["target"] = float(row["goalId"])
+        row["target"] = float(row["target"])
         row["progress"] = float(row["progress"])
         row["complete"] = row["complete"] == "True"
         data.append({key: value for key, value in row.items() if value != ""})

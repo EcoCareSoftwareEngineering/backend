@@ -78,6 +78,69 @@ def test_put_iot_devices(login, iot_devices_data, iot_devices_tags_data, tags_da
     assert response == devices
 
 
+def test_add_new_iot_device(login, iot_devices_data):
+    unconnected_iot_devices = [
+        {
+            "ipAddress": "192.168.0.11",
+            "name": "Smart Light",
+            "description": "A smart lightbulb",
+            "state": [],
+            "status": "On",
+            "faultStatus": "Ok",
+        },
+        {
+            "ipAddress": "192.168.0.12",
+            "name": "Smart Lock",
+            "description": "A smart lock",
+            "state": [{"fieldName": "engaged", "datatype": "boolean", "value": True}],
+            "status": "On",
+            "faultStatus": "Ok",
+        },
+    ]
+
+    assert (
+        unconnected_iot_devices
+        == requests.get(
+            "http://127.0.0.1:5000/api/devices/new/", headers={"token": login}
+        ).json()
+    )
+
+    assert (
+        200
+        == requests.post(
+            "http://127.0.0.1:5000/api/devices/",
+            headers={"token": login},
+            json={"ipAddress": "192.168.0.11"},
+        ).status_code
+    )
+
+    devices = iot_devices_data.copy()
+    devices.append(
+        {
+            "ipAddress": "192.168.0.11",
+            "name": "Smart Light",
+            "description": "A smart lightbulb",
+            "state": [],
+            "status": "On",
+            "faultStatus": "Ok",
+            "customTags": [],
+            "deviceId": 8,
+            "faultStatus": "Ok",
+            "pinEnabled": False,
+            "roomTag": None,
+            "uptimeTimestamp": None,
+            "unlocked": None,
+            "userTags": [],
+        }
+    )
+    assert (
+        devices
+        == requests.get(
+            "http://127.0.0.1:5000/api/devices/", headers={"token": login}
+        ).json()
+    )
+
+
 def test_delete_iot_devices(login, iot_devices_data, iot_devices_tags_data, tags_data):
     for device in iot_devices_data:
         roomTag = None

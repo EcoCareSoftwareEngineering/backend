@@ -16,27 +16,24 @@ with open("config/smart_home_config.json") as file:
     local_device_config = json.load(file)
     local_device_config["locked"] = bool(local_device_config["locked"])
 
-unconnected_iot_devices = []
-
-""" Uncomment this definition if not using spoof app so can still have unconnected IoT devices """
-# unconnected_iot_devices = [
-#     {
-#         "ipAddress": "192.168.0.9",
-#         "name": "Smart Light",
-#         "description": "A smart lightbulb",
-#         "state": [],
-#         "status": "On",
-#         "faultStatus": "Ok",
-#     },
-#     {
-#         "ipAddress": "192.168.0.10",
-#         "name": "Smart Lock",
-#         "description": "A smart lock",
-#         "state": [{"fieldName": "engaged", "datatype": "boolean", "value": True}],
-#         "status": "On",
-#         "faultStatus": "Ok",
-#     },
-# ]
+unconnected_iot_devices = [
+    {
+        "ipAddress": "192.168.0.11",
+        "name": "Smart Light",
+        "description": "A smart lightbulb",
+        "state": [],
+        "status": "On",
+        "faultStatus": "Ok",
+    },
+    {
+        "ipAddress": "192.168.0.12",
+        "name": "Smart Lock",
+        "description": "A smart lock",
+        "state": [{"fieldName": "engaged", "datatype": "boolean", "value": True}],
+        "status": "On",
+        "faultStatus": "Ok",
+    },
+]
 
 tokens = {"remote": [], "local": None}
 

@@ -187,6 +187,7 @@ def post_devices_handler():
                 status=find["status"],
                 faultStatus=find["faultStatus"],
                 ipAddress=find["ipAddress"],
+                pinCode="None",
             )
             .returning(IotDevices.deviceId)
         )
