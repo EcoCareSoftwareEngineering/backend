@@ -470,7 +470,7 @@ def devices_usage_handler():
         return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
 
     # Validate time_period
-    allowed_periods = {"hourly", "daily", "weekly", "monthly"}
+    allowed_periods = {"hourly", "daily", "monthly"}
     if time_period not in allowed_periods:
         return jsonify({"error": f"Invalid timePeriod. Must be one of: {allowed_periods}"}), 400
 
@@ -489,14 +489,6 @@ def devices_usage_handler():
         format_string = "%Y-%m-%d"
         delta = timedelta(days=1)
         current = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
-
-    elif time_period == "weekly":
-        time_group = func.date_format(
-            func.date_sub(IotDeviceUsage.datetime, text("INTERVAL WEEKDAY(datetime) DAY")), "%Y-%m-%d"
-        )
-        format_string = "%Y-%m-%d"
-        delta = timedelta(days=7)
-        current = start_datetime - timedelta(days=start_datetime.weekday())
 
     elif time_period == "monthly":
         time_group = func.date_format(IotDeviceUsage.datetime, "%Y-%m-01 00:00:00")
@@ -546,17 +538,19 @@ def devices_usage_handler():
     with db.engine.connect() as conn:
         results = conn.execute(statement).fetchall()
     
-    usage_dict = {}
+    usage_dict = {}#
     for result_device_id, time_str, usage in results:
         if time_period == "monthly":
             formatted_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m")
+        elif time_period == "daily":
+            formatted_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
         else:
             formatted_time = time_str
             
         if result_device_id not in usage_dict:
             usage_dict[result_device_id] = {}
         
-        usage_dict[result_device_id][formatted_time] = float(usage) if usage is not None else 0.0
+        usage_dict[result_device_id][formatted_time] = float(usage) if usage is not None else usage
     
     response = []
     for current_device_id in device_ids:
