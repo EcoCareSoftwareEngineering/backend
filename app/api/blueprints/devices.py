@@ -252,10 +252,26 @@ def devices_update_handler(device_id: int):
         return delete_devices_update_handler(device_id)
     return jsonify({"Error": "Invalid"}), 500
 
+
 def put_devices_update_handler(device_id: int):
     json = request.json
     if json is None:
         return jsonify({}), 500
+
+    select_statement = select(IotDevices.unlocked).where(
+        IotDevices.deviceId == device_id
+    )
+
+    with db.engine.connect() as conn:
+        result = conn.execute(select_statement).first()
+
+    if result is None:
+        return jsonify({"Error": "Device not found"}), 500
+
+    result = result[0]
+
+    if not result:
+        return jsonify({"Error": "Device locked"}), 500
 
     values = {}
 
@@ -266,7 +282,9 @@ def put_devices_update_handler(device_id: int):
     if "state" in json:
         values["state"] = json["state"]
     if "status" in json:
-        status_value = IotDeviceStatus.On if json["status"] == "On" else IotDeviceStatus.Off
+        status_value = (
+            IotDeviceStatus.On if json["status"] == "On" else IotDeviceStatus.Off
+        )
         values["status"] = status_value
 
     update_statement = (
@@ -473,7 +491,12 @@ def devices_usage_handler():
     # Validate time_period
     allowed_periods = {"hourly", "daily", "monthly"}
     if time_period not in allowed_periods:
-        return jsonify({"error": f"Invalid timePeriod. Must be one of: {allowed_periods}"}), 400
+        return (
+            jsonify(
+                {"error": f"Invalid timePeriod. Must be one of: {allowed_periods}"}
+            ),
+            400,
+        )
 
     # Define grouping logic and generate all time periods
     all_timestamps = []
@@ -494,7 +517,9 @@ def devices_usage_handler():
     elif time_period == "monthly":
         time_group = func.date_format(IotDeviceUsage.datetime, "%Y-%m-01 00:00:00")
         format_string = "%Y-%m"
-        current = start_datetime.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        current = start_datetime.replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
 
     while current < end_datetime:
         all_timestamps.append(current.strftime(format_string))
@@ -506,28 +531,27 @@ def devices_usage_handler():
         else:
             current += delta
 
-     
     if device_id:
         device_ids = [device_id]
     else:
         device_query = select(distinct(IotDeviceUsage.deviceId))
         with db.engine.connect() as conn:
             device_ids = [row[0] for row in conn.execute(device_query).fetchall()]
-    
+
     statement = (
         select(
             IotDeviceUsage.deviceId,
             time_group.label("time_period"),
-            func.sum(IotDeviceUsage.usage).label("usage")
+            func.sum(IotDeviceUsage.usage).label("usage"),
         )
         .where(
-            (IotDeviceUsage.datetime >= start_datetime) &
-            (IotDeviceUsage.datetime <= end_datetime)
+            (IotDeviceUsage.datetime >= start_datetime)
+            & (IotDeviceUsage.datetime <= end_datetime)
         )
         .group_by(IotDeviceUsage.deviceId, "time_period")
         .order_by("time_period")
     )
-    
+
     if device_id:
         try:
             device_id = int(device_id)
@@ -535,30 +559,39 @@ def devices_usage_handler():
             statement = statement.where(IotDeviceUsage.deviceId == device_id)
         except ValueError:
             return jsonify({"error": "Device ID must be a number"}), 400
-    
+
     with db.engine.connect() as conn:
         results = conn.execute(statement).fetchall()
-    
-    usage_dict = {}#
+
+    usage_dict = {}  #
     for result_device_id, time_str, usage in results:
         if time_period == "monthly":
-            formatted_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m")
+            formatted_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").strftime(
+                "%Y-%m"
+            )
         elif time_period == "daily":
-            formatted_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
+            formatted_time = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").strftime(
+                "%Y-%m-%d"
+            )
         else:
             formatted_time = time_str
-            
+
         if result_device_id not in usage_dict:
             usage_dict[result_device_id] = {}
-        
-        usage_dict[result_device_id][formatted_time] = float(usage) if usage is not None else usage
-    
+
+        usage_dict[result_device_id][formatted_time] = (
+            float(usage) if usage is not None else usage
+        )
+
     response = []
     for current_device_id in device_ids:
         usage_list = [
-            {"datetime": timestamp, "usage": usage_dict.get(current_device_id, {}).get(timestamp, 0.0)}
+            {
+                "datetime": timestamp,
+                "usage": usage_dict.get(current_device_id, {}).get(timestamp, 0.0),
+            }
             for timestamp in all_timestamps
         ]
         response.append({"deviceId": current_device_id, "usage": usage_list})
-    
+
     return jsonify(response), 200
