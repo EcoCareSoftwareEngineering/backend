@@ -84,13 +84,14 @@ def post_tags_handler():
 
 
 # route supports GET & DELETE for tag_id
-@tags_blueprint.route("/<int:tag_id>", methods=["GET", "DELETE"])
+@tags_blueprint.route("/<int:tag_id>/", methods=["GET", "DELETE"])
 @check_authentication
 def tag_handle(tag_id):
     if request.method == "GET":
         return get_single_tag(tag_id)
     elif request.method == "DELETE":
         return delete_tag_handler(tag_id)
+    return jsonify({"Error": "Invalid"}), 500
 
 
 # GET single tag
