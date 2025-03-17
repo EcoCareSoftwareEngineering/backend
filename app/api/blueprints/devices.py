@@ -479,21 +479,21 @@ def devices_usage_handler():
     time_period = request.args.get("timePeriod", "hourly")
 
     if start_date is None or end_date is None:
-        return jsonify({"error": "Missing required fields: rangeStart, rangeEnd"}), 400
+        return jsonify({"Error": "Missing required fields: rangeStart, rangeEnd"}), 400
 
     try:
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
         end_datetime = end_datetime.replace(hour=0, minute=0, second=0)
     except ValueError:
-        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+        return jsonify({"Error": "Invalid date format. Use YYYY-MM-DD"}), 400
 
     # Validate time_period
     allowed_periods = {"hourly", "daily", "monthly"}
     if time_period not in allowed_periods:
         return (
             jsonify(
-                {"error": f"Invalid timePeriod. Must be one of: {allowed_periods}"}
+                {"Error": f"Invalid timePeriod. Must be one of: {allowed_periods}"}
             ),
             400,
         )
@@ -558,7 +558,7 @@ def devices_usage_handler():
             device_ids = [device_id]
             statement = statement.where(IotDeviceUsage.deviceId == device_id)
         except ValueError:
-            return jsonify({"error": "Device ID must be a number"}), 400
+            return jsonify({"Error": "Device ID must be a number"}), 400
 
     with db.engine.connect() as conn:
         results = conn.execute(statement).fetchall()
