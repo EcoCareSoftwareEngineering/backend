@@ -305,7 +305,8 @@ def put_devices_update_handler(device_id: int):
 
     rows = []
     if "roomTag" in json:
-        rows.append({"deviceId": device_id, "tagId": int(json["roomTag"])})
+        if json["roomTag"]:
+            rows.append({"deviceId": device_id, "tagId": int(json["roomTag"])})
     elif room_tag is not None:
         rows.append({"deviceId": device_id, "tagId": int(room_tag)})
     if "userTag" in json:
