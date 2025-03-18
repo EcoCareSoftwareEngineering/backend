@@ -189,6 +189,7 @@ def post_devices_handler():
                 faultStatus=find["faultStatus"],
                 ipAddress=find["ipAddress"],
                 pinCode="None",
+                unlocked=True,
             )
             .returning(IotDevices.deviceId)
         )
