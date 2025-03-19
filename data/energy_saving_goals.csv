@@ -1,3 +1,8 @@
 goalId,name,target,progress,complete,date
 1,Switch to LED Lighting,150.0,100.0,False,2025-04-02
 2,Reduce Energy Consumption,500.0,200.0,False,2025-04-02
+3,Install Solar Panels,1000.0,300.0,False,2025-06-15
+4,Implement Smart Thermostats,300.0,120.0,False,2025-04-20
+5,Upgrade Insulation,600.0,200.0,False,2025-07-01
+6,Reduce Water Heating Costs,400.0,150.0,False,2025-05-30
+7,Use Energy-Efficient Appliances,350.0,100.0,False,2025-06-05
